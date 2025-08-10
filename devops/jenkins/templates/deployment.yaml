@@ -17,6 +17,8 @@ spec:
         app.kubernetes.io/name: jenkins
         app.kubernetes.io/instance: my-jenkins
     spec:
+      securityContext:
+        fsGroup: 1000
       initContainers:
         - name: volume-permissions
           image: busybox
@@ -28,8 +30,23 @@ spec:
       containers:
         - name: jenkins
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+              hostPort: 7070   # bind node port 7070
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /login
+              port: http
+            initialDelaySeconds: 60
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
