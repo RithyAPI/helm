@@ -3,10 +3,22 @@ image:
   tag: lts
   pullPolicy: IfNotPresent
 
+resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+# Persistence (chart will create the PVC)
 persistence:
   enabled: true
-  storageClass: manual
-  accessMode: ReadWriteOnce
+  existingClaim: ""            # leave empty to let Helm create it
+  claimName: my-jenkins-pvc
+  storageClass: ""             # "" = use cluster default StorageClass
+  accessModes:                 # must be a LIST (not a single string)
+    - ReadWriteOnce
   size: 50Gi
 
 service:
@@ -33,3 +45,21 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
+
+# Health probes (Jenkins boots slow on first start)
+readinessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 180
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+# Pod-level security (matches Jenkins UID/GID)
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000

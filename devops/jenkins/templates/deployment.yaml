@@ -30,23 +30,34 @@ spec:
       containers:
         - name: jenkins
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
               containerPort: 8080
-              hostPort: 7070   # bind node port 7070
+              hostPort: {{ .Values.service.nodePort | default 7070 }}   # bind node port
+            - name: agent
+              containerPort: 50000
           readinessProbe:
             httpGet:
               path: /login
               port: http
-            initialDelaySeconds: 30
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 120 }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 30 }}
           livenessProbe:
             httpGet:
               path: /login
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 180 }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 20 }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 10 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            runAsUser: {{ .Values.securityContext.runAsUser | default 1000 }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup | default 1000 }}
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
@@ -54,4 +65,4 @@ spec:
       volumes:
         - name: jenkins-home
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.claimName | default "my-jenkins-pvc" }}
+            claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.claimName | default "my-jenkins-pvc" }}
