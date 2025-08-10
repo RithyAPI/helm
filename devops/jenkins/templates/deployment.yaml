@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: jenkins
     app.kubernetes.io/instance: my-jenkins
 spec:
-  replicas: {{ .Values.replicas | default 2 }}
+  replicas: {{ .Values.replicas | default 1 }}  # RWO PVC -> 1 replica
   selector:
     matchLabels:
       app.kubernetes.io/name: jenkins
@@ -14,7 +14,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0   # keep all old pods until a new one is Ready
+      maxUnavailable: 0
       maxSurge: 1
   template:
     metadata:
@@ -22,12 +22,14 @@ spec:
         app.kubernetes.io/name: jenkins
         app.kubernetes.io/instance: my-jenkins
     spec:
+      terminationGracePeriodSeconds: 10
       securityContext:
         fsGroup: 1000
 
       volumes:
         - name: jenkins-home
-          emptyDir: {}   # ephemeral (wiped on reschedule)
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.claimName }}
 
       initContainers:
         - name: volume-permissions
@@ -47,17 +49,13 @@ spec:
             - name: agent
               containerPort: 50000
           readinessProbe:
-            httpGet:
-              path: /login
-              port: http
+            httpGet: { path: /login, port: http }
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 120 }}
             periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 30 }}
           livenessProbe:
-            httpGet:
-              path: /login
-              port: http
+            httpGet: { path: /login, port: http }
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 180 }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 20 }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}

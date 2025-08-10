@@ -1,4 +1,11 @@
 replicas: 1
+persistence:
+  enabled: true
+  existingClaim: ""          # leave empty to let chart create
+  claimName: my-jenkins-pvc
+  storageClass: ""           # "" = default SC
+  accessModes: [ReadWriteOnce]
+  size: 50Gi
 image:
   repository: jenkins/jenkins
   tag: lts
