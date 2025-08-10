@@ -1,4 +1,4 @@
-replicas: 4
+replicas: 1
 image:
   repository: jenkins/jenkins
   tag: lts
@@ -26,6 +26,8 @@ service:
   type: NodePort
   port: 8080
   nodePort: 30080
+  nodePortHttp: 32070
+  nodePortAgent: 32000
 
 serviceAccount:
   create: true
