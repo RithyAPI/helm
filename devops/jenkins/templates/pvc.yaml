@@ -1,15 +1,13 @@
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.persistence.claimName }}
+  name: cmak-data
+  labels:
+    app: cmak
 spec:
   accessModes:
-  {{- toYaml .Values.persistence.accessModes | nindent 2 }}
+    - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.persistence.size }}
-  {{- if .Values.persistence.storageClass }}
-  storageClassName: {{ .Values.persistence.storageClass | quote }}
-  {{- end }}
-{{- end }}
+      storage: 10Gi  # Adjust size as needed
+  storageClassName: nfs-client  # Replace with your StorageClass if applicable
