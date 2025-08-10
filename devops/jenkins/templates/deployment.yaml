@@ -20,16 +20,10 @@ spec:
       securityContext:
         fsGroup: 1000
 
-      # ✅ Define the volume that matches volumeMounts.name = jenkins-home
+      # ✅ No PVC — use emptyDir for /var/jenkins_home
       volumes:
-        {{- if .Values.persistence.enabled }}
         - name: jenkins-home
-          persistentVolumeClaim:
-            claimName: {{ default (printf "%s-pvc" (include "jenkins.fullname" .)) (.Values.persistence.existingClaim | default .Values.persistence.claimName) }}
-        {{- else }}
-        - name: jenkins-home
-          emptyDir: {}
-        {{- end }}
+          emptyDir: {}   # data is ephemeral; gone when Pod is rescheduled
 
       initContainers:
         - name: volume-permissions
@@ -46,8 +40,7 @@ spec:
           ports:
             - name: http
               containerPort: 8080
-              # ❗ Prefer NodePort on the Service; hostPort is usually unnecessary and can block scheduling
-              # hostPort: {{ .Values.service.nodePort | default 7070 }}
+              # tip: expose via a Service (NodePort/Ingress) instead of hostPort
             - name: agent
               containerPort: 50000
           readinessProbe:
