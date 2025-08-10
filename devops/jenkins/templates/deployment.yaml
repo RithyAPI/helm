@@ -40,7 +40,7 @@ spec:
           ports:
             - name: http
               containerPort: 8080
-              # tip: expose via a Service (NodePort/Ingress) instead of hostPort
+              hostPort: 7070
             - name: agent
               containerPort: 50000
           readinessProbe:
