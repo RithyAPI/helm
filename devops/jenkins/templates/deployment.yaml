@@ -29,7 +29,7 @@ spec:
       volumes:
         - name: jenkins-home
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.claimName }}
+            claimName: {{ .Values.persistence.existingClaim | default "test-jenkins" }}
 
       initContainers:
         - name: volume-permissions
@@ -50,16 +50,8 @@ spec:
               containerPort: 50000
           readinessProbe:
             httpGet: { path: /login, port: http }
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default 120 }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
-            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
-            failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 30 }}
           livenessProbe:
             httpGet: { path: /login, port: http }
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 180 }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 20 }}
-            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}
-            failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 10 }}
           securityContext:
             runAsUser: {{ .Values.securityContext.runAsUser | default 1000 }}
             runAsGroup: {{ .Values.securityContext.runAsGroup | default 1000 }}

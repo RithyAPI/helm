@@ -1,9 +1,9 @@
-replicas: 1   # RWO volume -> 1 controller pod
 persistence:
   enabled: true
   existingClaim: test-jenkins
-  claimName: ""
-  storageClass: ""
+  claimName: ""          # make sure chart does NOT try to create another PVC
+  storageClass: ""       # not needed when using existingClaim
+replicas: 1              # RWO -> single controller pod
 image:
   repository: jenkins/jenkins
   tag: lts
