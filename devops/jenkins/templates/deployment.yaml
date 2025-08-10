@@ -19,9 +19,21 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+
+      # ✅ Define the volume that matches volumeMounts.name = jenkins-home
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: {{ default (printf "%s-pvc" (include "jenkins.fullname" .)) (.Values.persistence.existingClaim | default .Values.persistence.claimName) }}
+        {{- else }}
+        - name: jenkins-home
+          emptyDir: {}
+        {{- end }}
+
       initContainers:
         - name: volume-permissions
-          image: busybox
+          image: busybox:1.36.1
           command: ["sh", "-c", "chown -R 1000:1000 /var/jenkins_home"]
           volumeMounts:
             - name: jenkins-home
@@ -34,7 +46,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
-              hostPort: {{ .Values.service.nodePort | default 7070 }}   # bind node port
+              # ❗ Prefer NodePort on the Service; hostPort is usually unnecessary and can block scheduling
+              # hostPort: {{ .Values.service.nodePort | default 7070 }}
             - name: agent
               containerPort: 50000
           readinessProbe:
