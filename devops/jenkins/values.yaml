@@ -1,7 +1,7 @@
 replicas: 1
 persistence:
   enabled: true
-  claimName: jenkins-data          # <— fixed, do not change
+  claimName: my-jenkins-pvc          # <— fixed, do not change
   size: 50Gi
   accessModes: [ReadWriteOnce]
   storageClass: local-path

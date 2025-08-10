@@ -25,9 +25,9 @@ spec:
       securityContext:
         fsGroup: 1000
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: {{ .Values.persistence.claimName }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.claimName }}
 
       initContainers:
         - name: volume-permissions
