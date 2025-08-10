@@ -1,14 +1,11 @@
 replicas: 1
 persistence:
   enabled: true
-  claimName: spring-pvc
+  existingClaim: ""              # ensure chart will create it
+  claimName: my-jenkins-pvc      # NEW name
   size: 50Gi
   accessModes: [ReadWriteOnce]
   storageClass: local-path
-image:
-  repository: jenkins/jenkins
-  tag: lts
-  pullPolicy: IfNotPresent
 
 resources:
   requests:
