@@ -26,10 +26,10 @@ spec:
       securityContext:
         fsGroup: 1000
 
-      volumes:
-        - name: jenkins-home
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default "test-jenkins" }}
+      volumes: 
+        - name: images-vol
+          persistentVolumeClaim: 
+            claimName: spring-pvc
 
       initContainers:
         - name: volume-permissions
