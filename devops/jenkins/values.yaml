@@ -1,9 +1,9 @@
 replicas: 1   # RWO volume -> 1 controller pod
 persistence:
   enabled: true
-  existingClaim: my-jenkins-pvc2   # use the one that is Bound
-  claimName: ""                    # don't create a new PVC
-  storageClass: ""                 # not needed for existingClaim
+  existingClaim: test-jenkins
+  claimName: ""
+  storageClass: ""
 image:
   repository: jenkins/jenkins
   tag: lts
