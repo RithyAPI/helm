@@ -27,7 +27,8 @@ spec:
 
       volumes:
         - name: jenkins-home
-          emptyDir: {}   # ephemeral (wiped on reschedule)
+          persistentVolumeClaim:
+            claimName: spring-pvc
 
       initContainers:
         - name: volume-permissions
