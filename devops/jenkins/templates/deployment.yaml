@@ -61,8 +61,3 @@ spec:
           volumeMounts:
             - name: jenkins-home
               mountPath: /var/jenkins_home
-
-      volumes:
-        - name: jenkins-home
-          persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default .Values.persistence.claimName | default "my-jenkins-pvc" }}
