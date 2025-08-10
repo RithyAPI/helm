@@ -1,0 +1,35 @@
+image:
+  repository: jenkins/jenkins
+  tag: lts
+  pullPolicy: IfNotPresent
+
+persistence:
+  enabled: true
+  storageClass: manual
+  accessMode: ReadWriteOnce
+  size: 50Gi
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 30080
+
+serviceAccount:
+  create: true
+  name: ""
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: jenkins.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
