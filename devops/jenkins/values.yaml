@@ -1,12 +1,9 @@
-replicas: 1
+replicas: 1   # RWO volume -> 1 controller pod
 persistence:
   enabled: true
-  existingClaim: ""          # let chart create PVC
-  claimName: my-jenkins-pvc
-  storageClass: standard     # <-- set a real SC name
-  accessModes:
-    - ReadWriteOnce
-  size: 50Gi
+  existingClaim: my-jenkins-pvc2   # use the one that is Bound
+  claimName: ""                    # don't create a new PVC
+  storageClass: ""                 # not needed for existingClaim
 image:
   repository: jenkins/jenkins
   tag: lts
