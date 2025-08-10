@@ -17,16 +17,6 @@ resources:
     cpu: "1"
     memory: "2Gi"
 
-# Persistence (chart will create the PVC)
-persistence:
-  enabled: true
-  existingClaim: ""            # leave empty to let Helm create it
-  claimName: my-jenkins-pvc
-  storageClass: ""             # "" = use cluster default StorageClass
-  accessModes:                 # must be a LIST (not a single string)
-    - ReadWriteOnce
-  size: 50Gi
-
 service:
   type: NodePort
   port: 8080
