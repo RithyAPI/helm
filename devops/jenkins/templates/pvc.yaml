@@ -1,12 +1,16 @@
-{{- if .Values.persistence.enabled }}
+{{- /* Create a new PVC only when persistence is enabled AND no existingClaim is provided */ -}}
+{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "mychart.fullname" . }}-pvc
+  name: {{ printf "%s-pvc" .Release.Name }}
 spec:
-  accessModes: {{ toYaml .Values.persistence.accessModes | nindent 2 }}
+  accessModes:
+{{- toYaml (default (list "ReadWriteOnce") .Values.persistence.accessModes) | nindent 4 }}
   resources:
     requests:
-      storage: {{ .Values.persistence.size }}
-  storageClassName: {{ .Values.persistence.storageClass }}
+      storage: {{ default "10Gi" .Values.persistence.size }}
+{{- if hasKey .Values.persistence "storageClass" }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+{{- end }}
 {{- end }}

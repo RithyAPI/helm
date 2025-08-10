@@ -3,7 +3,8 @@ persistence:
   size: 10Gi
   accessModes:
     - ReadWriteOnce
-  storageClass: local-path
+  # storageClass: local-path   # optional
+  # existingClaim: ""          # set to use an already-created PVC
 replicas: 1
 image:
   repository: jenkins/jenkins
