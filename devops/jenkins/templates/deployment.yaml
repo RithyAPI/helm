@@ -27,9 +27,6 @@ spec:
         fsGroup: 1000
 
       volumes:
-        - name: cmak-config
-          configMap:
-            name: cmak-config
         - name: cmak-data
           persistentVolumeClaim:
             claimName: cmak-data
