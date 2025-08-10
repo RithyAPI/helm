@@ -44,10 +44,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
-              hostPort: 7070        # ← this triggers scheduling constraints
             - name: agent
               containerPort: 50000
-              hostPort: 50000       # ← this will block a 2nd replica on a 1-node cluster
           readinessProbe:
             httpGet:
               path: /login
