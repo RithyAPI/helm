@@ -27,9 +27,12 @@ spec:
         fsGroup: 1000
 
       volumes:
-        - name: jenkins-home
+        - name: cmak-config
+          configMap:
+            name: cmak-config
+        - name: cmak-data
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.existingClaim | default "test-jenkins" }}
+            claimName: cmak-data
 
       initContainers:
         - name: volume-permissions
