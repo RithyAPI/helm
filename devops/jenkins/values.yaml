@@ -1,8 +1,9 @@
 persistence:
   enabled: true
   existingClaim: test-jenkins
-  claimName: ""          # make sure chart does NOT try to create another PVC
-  storageClass: ""       # not needed when using existingClaim
+  claimName: ""
+  storageClass: ""
+  size: ""
 replicas: 1              # RWO -> single controller pod
 image:
   repository: jenkins/jenkins
