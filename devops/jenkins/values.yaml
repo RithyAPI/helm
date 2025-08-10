@@ -1,7 +1,8 @@
 replicas: 1
 persistence:
   enabled: true
-  size: 10Gi
+  claimName: jenkins-data          # <— fixed, do not change
+  size: 50Gi
   accessModes: [ReadWriteOnce]
   storageClass: local-path
 image:

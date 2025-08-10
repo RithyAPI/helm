@@ -28,7 +28,7 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: {{ printf "%s-pvc" .Release.Name }}
+          claimName: {{ .Values.persistence.claimName }}
 
       initContainers:
         - name: volume-permissions
