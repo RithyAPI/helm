@@ -1,14 +1,9 @@
+replicas: 1   # RWO volume -> 1 controller pod
 persistence:
   enabled: true
-  existingClaim: ""  # Leave empty to create new PVC
-  claimName: "my-jenkins-pvc"  # Name of the PVC to create
-  storageClass: "local-path"   # Set your storage class here
-  accessModes:
-    - ReadWriteOnce
-  size: 50Gi
-  annotations: {}
-  selector: {}
-replicas: 1              # RWO -> single controller pod
+  existingClaim: test-jenkins   # Bound and working
+  claimName: ""
+  storageClass: ""
 image:
   repository: jenkins/jenkins
   tag: lts
