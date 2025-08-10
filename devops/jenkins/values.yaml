@@ -1,6 +1,6 @@
 replicas: 1
 persistence:
-  claimName: my-jenkins-pvc-new
+  claimName: spring-pvc
   size: 50Gi
   accessModes: [ReadWriteOnce]
   storageClass: local-path
