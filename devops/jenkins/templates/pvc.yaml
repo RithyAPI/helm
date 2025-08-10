@@ -1,41 +1,15 @@
-{{- /* templates/pvc.yaml */ -}}
-{{- if and .Values.persistence.enabled (not .Values.persistence.existingClaim) -}}
-{{- $name := default (printf "%s-pvc" (include "jenkins.fullname" .)) .Values.persistence.claimName -}}
-{{- $existing := lookup "v1" "PersistentVolumeClaim" .Release.Namespace $name -}}
-
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ $name }}
+  name: {{ include "jenkins.fullname" . }}-pvc
   labels:
-    app.kubernetes.io/name: {{ include "jenkins.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ include "jenkins.name" . }}
 spec:
-  {{- /* AccessModes: use existing (immutable) if present, else from values/default */ -}}
-  {{- $am := (default (list "ReadWriteOnce") .Values.persistence.accessModes) -}}
-  {{- if $existing }}
-  {{- $am = $existing.spec.accessModes }}
-  {{- end }}
   accessModes:
-{{ toYaml $am | nindent 4 }}
-
+    - {{ .Values.persistence.accessMode | default "ReadWriteOnce" }}
   resources:
     requests:
       storage: {{ .Values.persistence.size | default "50Gi" }}
-
-  {{- /* storageClassName: keep existing if set (immutable), else use values if provided */ -}}
-  {{- $sc := "" -}}
-  {{- if and (hasKey .Values.persistence "storageClass") .Values.persistence.storageClass }}
-  {{- $sc = .Values.persistence.storageClass -}}
-  {{- else if and $existing (hasKey $existing.spec "storageClassName") $existing.spec.storageClassName }}
-  {{- $sc = $existing.spec.storageClassName -}}
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass }}
   {{- end }}
-  {{- if $sc }}
-  storageClassName: {{ $sc | quote }}
-  {{- end }}
-
-  {{- /* volumeName: if PVC already bound, render same value to avoid diff; never set on first create */ -}}
-  {{- if and $existing $existing.spec.volumeName }}
-  volumeName: {{ $existing.spec.volumeName | quote }}
-  {{- end }}
-{{- end }}
