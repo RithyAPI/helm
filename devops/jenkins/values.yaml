@@ -1,9 +1,4 @@
-replicas: 1   # RWO volume -> 1 controller pod
-persistence:
-  enabled: true
-  existingClaim: test-jenkins   # Bound and working
-  claimName: ""
-  storageClass: ""
+replicas: 1
 image:
   repository: jenkins/jenkins
   tag: lts
