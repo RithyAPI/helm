@@ -24,7 +24,6 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
-
       volumes:
       - name: data
         persistentVolumeClaim:

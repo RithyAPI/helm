@@ -2,14 +2,13 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.persistence.claimName | default (printf "%s-pvc" .Release.Name) }}
+  name: jenkins-data
   annotations:
-    "helm.sh/resource-policy": keep   # <— prevents deletion on helm uninstall
+    "helm.sh/resource-policy": keep
 spec:
-  accessModes:
-{{- toYaml (default (list "ReadWriteOnce") .Values.persistence.accessModes) | nindent 4 }}
+  accessModes: [ReadWriteOnce]
   resources:
     requests:
-      storage: {{ default "50Gi" .Values.persistence.size }}
-  storageClassName: {{ .Values.persistence.storageClass | quote }}
+      storage: 50Gi
+  storageClassName: "local-path"
 {{- end }}
