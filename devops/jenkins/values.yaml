@@ -1,6 +1,5 @@
 replicas: 1
 persistence:
-  enabled: true
   claimName: my-jenkins-pvc          # <— fixed, do not change
   size: 50Gi
   accessModes: [ReadWriteOnce]
