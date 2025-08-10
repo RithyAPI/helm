@@ -1,6 +1,6 @@
 replicas: 1
 persistence:
-  claimName: my-jenkins-pvc          # <— fixed, do not change
+  claimName: my-jenkins-pvc-new
   size: 50Gi
   accessModes: [ReadWriteOnce]
   storageClass: local-path
