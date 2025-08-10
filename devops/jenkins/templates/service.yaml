@@ -1,15 +1,21 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "jenkins.fullname" . }}
+  name: my-jenkins-svc
   labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
+    app.kubernetes.io/name: jenkins
+    app.kubernetes.io/instance: my-jenkins
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    {{- include "jenkins.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: jenkins
+    app.kubernetes.io/instance: my-jenkins
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: {{ .Values.service.nodePortHttp | default 32070 }}   # must be 30000–32767
+    - name: agent
+      port: 50000
+      targetPort: 50000
+      nodePort: {{ .Values.service.nodePortAgent | default 32000 }}
