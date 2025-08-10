@@ -1,5 +1,6 @@
 replicas: 1
 persistence:
+  enabled: true
   claimName: spring-pvc
   size: 50Gi
   accessModes: [ReadWriteOnce]
