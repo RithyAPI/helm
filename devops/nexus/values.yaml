@@ -54,3 +54,9 @@ livenessProbe:
   periodSeconds: 20
   timeoutSeconds: 5
   failureThreshold: 10
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automount: false
