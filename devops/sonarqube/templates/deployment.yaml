@@ -34,7 +34,7 @@ spec:
 
           env:
             - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}?sslmode=disable&currentSchema=my_schema"
+              value: "jdbc:postgresql://{{ .Values.postgres.host }}:{{ .Values.postgres.port }}/{{ .Values.postgres.database }}?sslmode=disable?currentSchema=public"
             - name: SONAR_JDBC_USERNAME
               value: "{{ .Values.postgres.username }}"
             {{- if .Values.postgresExistingSecret }}
