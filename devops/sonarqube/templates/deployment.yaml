@@ -38,10 +38,7 @@ spec:
             - name: SONAR_JDBC_USERNAME
               value: "{{ .Values.postgres.username }}"
             - name: SONAR_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "pg.secretName" . }}
-                  key: {{ default "SONAR_DB_PASSWORD" .Values.postgres.existingSecretKey }}
+              value: "{{ .Values.postgres.password }}"
 
           {{- if .Values.env }}
           {{- range .Values.env }}
