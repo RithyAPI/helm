@@ -12,8 +12,7 @@ spec:
       app.kubernetes.io/name: nexus
       app.kubernetes.io/instance: {{ .Release.Name }}
 
-  {{- /* ---- Strategy: prefer Recreate to avoid overlapping pods on H2 ---- */ -}}
-  {{- $stype := default "Recreate" .Values.deploymentStrategy.type -}}
+  {{- $stype := (default "Recreate" (index .Values "deploymentStrategy" "type")) }}
   {{- if eq $stype "Recreate" }}
   strategy:
     type: Recreate
@@ -37,20 +36,23 @@ spec:
         fsGroupChangePolicy: {{ .Values.securityContext.fsGroupChangePolicy }}
         {{- end }}
 
-      {{- /* ---- Init containers: fix perms + clean stale H2 lock files ---- */ -}}
-      {{- $doFix := and .Values.persistence.enabled .Values.persistence.fixPermissions -}}
-      {{- $doClean := ( .Values.nexus.cleanupH2Locks | default true ) -}}
-      {{- if or $doFix $doClean }}
+      # Init containers
+      {{- $fixPerms := and .Values.persistence.enabled .Values.persistence.fixPermissions -}}
+      {{- $cleanLocks := (default true (index .Values "nexus" "cleanupH2Locks")) -}}
+      {{- if or $fixPerms $cleanLocks }}
       initContainers:
-        {{- if $doFix }}
+        {{- if $fixPerms }}
         - name: fix-perms
           image: busybox:1.36
-          command: ["sh","-c","mkdir -p {{ .Values.persistence.mountPath }} && chown -R {{ .Values.securityContext.runAsUser | default 200 }}:{{ .Values.securityContext.runAsGroup | default 200 }} {{ .Values.persistence.mountPath }}"]
+          command:
+            - sh
+            - -c
+            - "mkdir -p {{ .Values.persistence.mountPath }} && chown -R {{ .Values.securityContext.runAsUser | default 200 }}:{{ .Values.securityContext.runAsGroup | default 200 }} {{ .Values.persistence.mountPath }}"
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
         {{- end }}
-        {{- if $doClean }}
+        {{- if $cleanLocks }}
         - name: cleanup-h2-locks
           image: busybox:1.36
           command:
@@ -67,8 +69,7 @@ spec:
         {{- end }}
       {{- end }}
 
-      {{- /* ---- Graceful shutdown so DB unlocks cleanly ---- */ -}}
-      terminationGracePeriodSeconds: {{ .Values.nexus.terminationGraceSeconds | default 120 }}
+      terminationGracePeriodSeconds: {{ default 120 (index .Values "nexus" "terminationGraceSeconds") }}
 
       containers:
         - name: nexus
@@ -78,29 +79,28 @@ spec:
             runAsUser: {{ .Values.securityContext.runAsUser | default 200 }}
             runAsGroup: {{ .Values.securityContext.runAsGroup | default 200 }}
 
-          {{- if .Values.nexus.install4jAddVmParams }}
+          {{- if (index .Values "nexus" "install4jAddVmParams") }}
           env:
             - name: INSTALL4J_ADD_VM_PARAMS
-              value: {{ .Values.nexus.install4jAddVmParams | quote }}
+              value: {{ (index .Values "nexus" "install4jAddVmParams") | quote }}
           {{- end }}
 
           ports:
-            - name: nexus-ui
+            - name: http
               containerPort: {{ .Values.ports.ui | default 8081 }}
-          {{- if .Values.ports.docker.enabled }}
+          {{- if (index .Values "ports" "docker" "enabled") }}
             - name: docker
               containerPort: {{ .Values.ports.docker.port | default 5000 }}
           {{- end }}
 
-          {{- /* ---- Startup probe (prevents liveness killing cold starts) ---- */ -}}
-          {{- $sp := (index .Values "probes" "startup") | default dict -}}
-          {{- if (default true ($sp.enabled)) }}
+          # Startup probe (don’t kill during cold start)
+          {{- if (default true (index .Values "probes" "startup" "enabled")) }}
           startupProbe:
             httpGet:
-              path: {{ default "/" ($sp.path) }}
+              path: {{ default "/" (index .Values "probes" "startup" "path") }}
               port: {{ .Values.ports.ui | default 8081 }}
-            periodSeconds: {{ default 10 ($sp.periodSeconds) }}
-            failureThreshold: {{ default 60 ($sp.failureThreshold) }}
+            periodSeconds: {{ default 10  (index .Values "probes" "startup" "periodSeconds") }}
+            failureThreshold: {{ default 60 (index .Values "probes" "startup" "failureThreshold") }}
           {{- end }}
 
           readinessProbe:
@@ -124,7 +124,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/sh","-lc","sleep {{ .Values.nexus.preStopSleepSeconds | default 15 }}"]
+                command: ["/bin/sh","-lc","sleep {{ default 15 (index .Values "nexus" "preStopSleepSeconds") }}"]
 
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
