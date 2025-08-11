@@ -21,8 +21,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: {{ default 1 (dig "deploymentStrategy" "rollingUpdate" "maxUnavailable" .Values  ) }}
-      maxSurge: {{ default 0 (dig "deploymentStrategy" "rollingUpdate" "maxSurge" .Values ) }}
+      maxUnavailable: {{ default 1 (index .Values "deploymentStrategy" "rollingUpdate" "maxUnavailable") }}
+      maxSurge:       {{ default 0 (index .Values "deploymentStrategy" "rollingUpdate" "maxSurge") }}
   {{- end }}
 
   template:
