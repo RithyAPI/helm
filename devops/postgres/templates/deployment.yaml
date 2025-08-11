@@ -42,7 +42,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "chart.fullname" . }}-postgresql
+                  name: {{ include "pg.fullname" . }}-postgresql
                   key: POSTGRES_PASSWORD
           volumeMounts:
             - name: data
