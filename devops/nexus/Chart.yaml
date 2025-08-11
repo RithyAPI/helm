@@ -1,5 +1,5 @@
 apiVersion: v2
-name: jenkins
-description: A Helm chart for Jenkins
+name: nexus
+description: A Helm chart for nexus
 version: 0.1.0
-appVersion: "2.319" # Jenkins version you want to deploy
+appVersion: "2.319" # nexus version you want to deploy
