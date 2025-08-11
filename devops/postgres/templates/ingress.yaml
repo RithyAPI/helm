@@ -1,43 +1,21 @@
-{{- if .Values.ingress.enabled -}}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+{{- /*
+PostgreSQL is TCP (5432), so standard HTTP Ingress doesn't apply.
+For NGINX Ingress Controller, TCP exposure is configured via a special ConfigMap called "tcp-services".
+This template creates/patches a *namespaced* ConfigMap, but note: many NGINX deployments expect this
+in the controller's namespace (usually "ingress-nginx"). Adjust .Values.ingress.nginx.namespace accordingly.
+*/ -}}
+{{- $ing := .Values.ingress | default dict -}}
+{{- if ($ing.enabled | default false) -}}
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ include "jenkins.fullname" . }}
+  name: {{ include "pg.fullname" . }}-tcp
+  namespace: {{ $ing.nginx.namespace | default .Release.Namespace }}
   labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  {{- with .Values.ingress.className }}
-  ingressClassName: {{ . }}
-  {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  {{- end }}
-  rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ include "jenkins.fullname" $ }}
-                port:
-                  number: {{ $.Values.service.port }}
-          {{- end }}
-    {{- end }}
+    {{- include "pg.labels" . | nindent 4 }}
+data:
+  # Map <external-port> to "<namespace>/<service-name>:<service-port>"
+  {{- $ext := ( $ing.port | default 30432 ) -}}
+  {{- $svc := printf "%s/%s:%d" .Release.Namespace (include "pg.fullname" .) ( .Values.service.port | default 5432 ) -}}
+  "{{ $ext }}": "{{ $svc }}"
 {{- end }}

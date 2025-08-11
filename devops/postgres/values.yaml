@@ -16,12 +16,18 @@ service:
   type: ClusterIP
   port: 5432
 
+# PVC used by deployment.yaml
 persistence:
-  enabled: true
+  existingClaim: ""              # leave empty to let the chart create one named <release>-postgresql-data
   size: 10Gi
-  storageClass: "local-path"   # set to your class or leave empty for default
-  accessModes:
-    - ReadWriteOnce
+  storageClass: local-path
+  accessModes: [ReadWriteOnce]
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
 
 # Database bootstrap (standard postgres envs)
 postgres:
@@ -30,6 +36,13 @@ postgres:
   # Password comes from Secret (see templates/secret.yaml)
   existingSecretName: ""        # if you already have a secret, set it and ignore templates/secret.yaml
   existingSecretKey: POSTGRES_PASSWORD
+
+# NGINX TCP mapping (disabled by default)
+ingress:
+  enabled: false
+  nginx:
+    namespace: ingress-nginx     # set to your nginx controller namespace
+  port: 30432                     # external TCP port exposed by nginx
 
 # Optional: run *.sql/*.sh on first start (files put into /docker-entrypoint-initdb.d)
 initdb:

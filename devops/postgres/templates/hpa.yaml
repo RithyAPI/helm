@@ -1,32 +1,23 @@
-{{- if .Values.autoscaling.enabled }}
+{{- $as := .Values.autoscaling | default dict -}}
+{{- if ($as.enabled | default false) -}}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "jenkins.fullname" . }}
+  name: {{ include "pg.fullname" . }}
   labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
+    {{- include "pg.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "jenkins.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+    name: {{ include "pg.fullname" . }}
+  minReplicas: {{ $as.minReplicas | default 1 }}
+  maxReplicas: {{ $as.maxReplicas | default 1 }}
   metrics:
-    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
-    {{- end }}
-    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
-    {{- end }}
+          averageUtilization: {{ $as.targetCPUUtilizationPercentage | default 80 }}
 {{- end }}
