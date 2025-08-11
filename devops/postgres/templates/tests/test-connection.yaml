@@ -1,15 +1,20 @@
+{{- $tests := .Values.tests | default dict -}}
+{{- if ($tests.enabled | default false) -}}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "jenkins.fullname" . }}-test-connection"
+  name: "{{ include "pg.fullname" . }}-test-connection"
   labels:
-    {{- include "jenkins.labels" . | nindent 4 }}
+    {{- include "pg.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "jenkins.fullname" . }}:{{ .Values.service.port }}']
+    - name: pg-isready
+      image: postgres:15
+      command:
+        - sh
+        - -c
+        - pg_isready -h {{ include "pg.fullname" . }} -p {{ .Values.service.port | default 5432 }} -t 5
   restartPolicy: Never
+{{- end }}

@@ -1,5 +1,6 @@
 replicas: 1
-
+tests:
+  enabled: false
 image:
   repository: postgres
   tag: "15"
