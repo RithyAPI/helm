@@ -1,0 +1,86 @@
+replicas: 1
+
+image:
+  repository: sonarqube
+  tag: community
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automount: false
+
+service:
+  type: NodePort
+  port: 9000
+  nodePort: 30900
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []     # e.g. [{ host: "sonar.local", paths: [{ path: "/", pathType: ImplementationSpecific }] }]
+  tls: []       # e.g. [{ hosts: ["sonar.local"], secretName: "sonar-tls" }]
+
+postgres:
+  enabled: true
+  host: "postgres.default.svc.cluster.local"
+  port: 5432
+  database: "sonarqube"
+  username: "sonar"
+  # password comes from secret (see secret.yaml)
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  claimName: sonarqube-data
+  size: 20Gi
+  accessModes: [ReadWriteOnce]
+  storageClass: "local-path"
+
+paths:
+  data: /opt/sonarqube/data
+  extensions: /opt/sonarqube/extensions
+  logs: /opt/sonarqube/logs
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+probes:
+  startup:
+    enabled: true
+    periodSeconds: 10
+    failureThreshold: 60
+  readiness:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 180
+    periodSeconds: 20
+
+env:
+  # Optional extra JVM/ES flags; tune as needed
+  - name: SONAR_WEB_JAVAOPTS
+    value: "-Xmx2g -Xms2g -XX:+HeapDumpOnOutOfMemoryError"
+  - name: SONAR_CE_JAVAOPTS
+    value: "-Xmx1g -Xms1g"
+  # Set these if your nodes already have proper sysctls; otherwise leave empty
+  - name: SONAR_SEARCH_JAVAOPTS
+    value: "-Xms512m -Xmx512m"
+
+sysctl:
+  # Set to true ONLY if your cluster policy allows privileged initContainers.
+  # Otherwise, configure on nodes: vm.max_map_count=524288 and fs.file-max=131072
+  setOnInitContainer: false
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80

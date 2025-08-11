@@ -1,0 +1,23 @@
+{{- $as := .Values.autoscaling | default dict -}}
+{{- if ($as.enabled | default false) -}}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "sonarqube.fullname" . }}
+  labels:
+    {{- include "sonarqube.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "sonarqube.fullname" . }}
+  minReplicas: {{ $as.minReplicas | default 1 }}
+  maxReplicas: {{ $as.maxReplicas | default 2 }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $as.targetCPUUtilizationPercentage | default 80 }}
+{{- end }}

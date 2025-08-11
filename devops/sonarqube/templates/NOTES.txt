@@ -1,0 +1,14 @@
+1. Get SonarQube URL:
+
+  NodePort:  http://<node-ip>:{{ .Values.service.nodePort | default 30900 }}
+  Ingress:   check your DNS (ingress.enabled=true)
+
+2. First login:
+
+  Username: admin
+  Password: admin
+
+3. Troubleshooting:
+
+  kubectl logs deploy/{{ include "sonarqube.fullname" . }} -f
+  kubectl describe deploy/{{ include "sonarqube.fullname" . }}
