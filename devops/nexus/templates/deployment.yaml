@@ -93,7 +93,7 @@ spec:
           {{- end }}
 
           {{- /* ---- Startup probe (prevents liveness killing cold starts) ---- */ -}}
-          {{- $sp := (dig "probes" "startup" .Values) | default dict -}}
+          {{- $sp := (index .Values "probes" "startup") | default dict -}}
           {{- if (default true ($sp.enabled)) }}
           startupProbe:
             httpGet:
