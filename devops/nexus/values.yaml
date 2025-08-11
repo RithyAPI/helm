@@ -1,0 +1,56 @@
+replicas: 1
+
+image:
+  repository: sonatype/nexus3
+  tag: latest
+  pullPolicy: IfNotPresent
+
+ports:
+  ui: 8081
+  docker:
+    enabled: false
+    port: 5000
+
+service:
+  type: NodePort
+  uiPort: 8081
+  uiNodePort: 30082
+  dockerNodePort: 30083
+
+persistence:
+  enabled: true
+  existingClaim: ""          # if set, chart won't create a PVC
+  claimName: nexus-data-pvc  # used when existingClaim == ""
+  size: 50Gi
+  accessModes: [ReadWriteOnce]
+  storageClass: local-path
+  mountPath: /nexus-data
+  fixPermissions: true       # runs an initContainer chown
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+securityContext:
+  runAsUser: 200
+  runAsGroup: 200
+  fsGroup: 200
+  fsGroupChangePolicy: OnRootMismatch
+
+readinessProbe:
+  path: /
+  initialDelaySeconds: 90
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  path: /
+  initialDelaySeconds: 180
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
