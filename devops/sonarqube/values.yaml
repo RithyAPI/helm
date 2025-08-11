@@ -25,11 +25,11 @@ ingress:
 
 postgres:
   enabled: true
-  host: "postgres.default.svc.cluster.local"
-  port: 5432
+  host: "192.168.8.22"      # Server/node IP
+  port: 30438               # NodePort for PostgreSQL
   database: "sonarqube"
   username: "sonar"
-  # password comes from secret (see secret.yaml)
+  password: "Ut12345678!"   # static password you just set
 
 persistence:
   enabled: true
