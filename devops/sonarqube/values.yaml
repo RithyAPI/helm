@@ -29,7 +29,7 @@ postgres:
   port: 5432
   database: "forsonardbt"
   username: "sonar_sq"
-  password: "StrongP@ssw0rd"   # or use a Secret (below)
+  password: "U3Ryb25nUEBzc3cwcmQ="   # or use a Secret (below)
 
 persistence:
   enabled: true
