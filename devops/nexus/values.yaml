@@ -5,6 +5,23 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+deploymentStrategy:
+  type: Recreate            # prevents two pods mounting H2 at the same time
+
+nexus:
+  cleanupH2Locks: true
+  terminationGraceSeconds: 120
+  preStopSleepSeconds: 15
+  # Optional JVM tuning (helps avoid OOM on first boot)
+  # install4jAddVmParams: "-Xms1g -Xmx1.2g -XX:MaxDirectMemorySize=768m -XX:+UnlockExperimentalVMOptions -XX:ActiveProcessorCount=2"
+
+probes:
+  startup:
+    enabled: true
+    path: /
+    periodSeconds: 10
+    failureThreshold: 60
+
 ports:
   ui: 8081
   docker:

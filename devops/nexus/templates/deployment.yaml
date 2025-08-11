@@ -11,11 +11,20 @@ spec:
     matchLabels:
       app.kubernetes.io/name: nexus
       app.kubernetes.io/instance: {{ .Release.Name }}
+
+  {{- /* ---- Strategy: prefer Recreate to avoid overlapping pods on H2 ---- */ -}}
+  {{- $stype := default "Recreate" .Values.deploymentStrategy.type -}}
+  {{- if eq $stype "Recreate" }}
+  strategy:
+    type: Recreate
+  {{- else }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+      maxUnavailable: {{ default 1 (dig "deploymentStrategy" "rollingUpdate" "maxUnavailable" .Values  ) }}
+      maxSurge: {{ default 0 (dig "deploymentStrategy" "rollingUpdate" "maxSurge" .Values ) }}
+  {{- end }}
+
   template:
     metadata:
       labels:
@@ -27,15 +36,40 @@ spec:
         {{- if .Values.securityContext.fsGroupChangePolicy }}
         fsGroupChangePolicy: {{ .Values.securityContext.fsGroupChangePolicy }}
         {{- end }}
-      {{- if and .Values.persistence.enabled .Values.persistence.fixPermissions }}
+
+      {{- /* ---- Init containers: fix perms + clean stale H2 lock files ---- */ -}}
+      {{- $doFix := and .Values.persistence.enabled .Values.persistence.fixPermissions -}}
+      {{- $doClean := ( .Values.nexus.cleanupH2Locks | default true ) -}}
+      {{- if or $doFix $doClean }}
       initContainers:
+        {{- if $doFix }}
         - name: fix-perms
           image: busybox:1.36
           command: ["sh","-c","mkdir -p {{ .Values.persistence.mountPath }} && chown -R {{ .Values.securityContext.runAsUser | default 200 }}:{{ .Values.securityContext.runAsGroup | default 200 }} {{ .Values.persistence.mountPath }}"]
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
+        {{- end }}
+        {{- if $doClean }}
+        - name: cleanup-h2-locks
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - >
+              set -e;
+              echo "Cleaning H2 lock files if present...";
+              rm -f /nexus-data/lock /nexus-data/db/*.lock /nexus-data/db/*.lck || true;
+              echo "Done.";
+          volumeMounts:
+            - name: data
+              mountPath: /nexus-data
+        {{- end }}
       {{- end }}
+
+      {{- /* ---- Graceful shutdown so DB unlocks cleanly ---- */ -}}
+      terminationGracePeriodSeconds: {{ .Values.nexus.terminationGraceSeconds | default 120 }}
+
       containers:
         - name: nexus
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -43,6 +77,13 @@ spec:
           securityContext:
             runAsUser: {{ .Values.securityContext.runAsUser | default 200 }}
             runAsGroup: {{ .Values.securityContext.runAsGroup | default 200 }}
+
+          {{- if .Values.nexus.install4jAddVmParams }}
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: {{ .Values.nexus.install4jAddVmParams | quote }}
+          {{- end }}
+
           ports:
             - name: nexus-ui
               containerPort: {{ .Values.ports.ui | default 8081 }}
@@ -50,6 +91,18 @@ spec:
             - name: docker
               containerPort: {{ .Values.ports.docker.port | default 5000 }}
           {{- end }}
+
+          {{- /* ---- Startup probe (prevents liveness killing cold starts) ---- */ -}}
+          {{- $sp := (dig "probes" "startup" .Values) | default dict -}}
+          {{- if (default true ($sp.enabled)) }}
+          startupProbe:
+            httpGet:
+              path: {{ default "/" ($sp.path) }}
+              port: {{ .Values.ports.ui | default 8081 }}
+            periodSeconds: {{ default 10 ($sp.periodSeconds) }}
+            failureThreshold: {{ default 60 ($sp.failureThreshold) }}
+          {{- end }}
+
           readinessProbe:
             httpGet:
               path: {{ .Values.readinessProbe.path | default "/" }}
@@ -58,21 +111,30 @@ spec:
             periodSeconds: {{ .Values.readinessProbe.periodSeconds | default 10 }}
             timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds | default 5 }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold | default 30 }}
+
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.path | default "/" }}
               port: {{ .Values.ports.ui | default 8081 }}
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 180 }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default 300 }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds | default 20 }}
             timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds | default 5 }}
             failureThreshold: {{ .Values.livenessProbe.failureThreshold | default 10 }}
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh","-lc","sleep {{ .Values.nexus.preStopSleepSeconds | default 15 }}"]
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
           volumeMounts:
             {{- if .Values.persistence.enabled }}
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
             {{- end }}
+
       volumes:
         {{- if .Values.persistence.enabled }}
         - name: data
