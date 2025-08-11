@@ -2,7 +2,7 @@ replicas: 1
 
 image:
   repository: sonarqube
-  tag: "25.8.0.112029-community"
+  tag: "24.12.0.100206-community"
   pullPolicy: IfNotPresent
 
 serviceAccount:
