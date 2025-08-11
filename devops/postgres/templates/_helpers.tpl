@@ -13,5 +13,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- default (include "pg.fullname" .) $sa.name -}}
 {{- else -}}
 {{- default "default" $sa.name -}}
+{{- define "pg.secretName" -}}
+{{- if .Values.postgres.existingSecretName -}}
+{{ .Values.postgres.existingSecretName }}
+{{- else -}}
+{{ include "pg.fullname" . }}-db
 {{- end -}}
 {{- end -}}
