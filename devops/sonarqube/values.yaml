@@ -2,7 +2,7 @@ replicas: 1
 
 image:
   repository: sonarqube
-  tag: "25.8"
+  tag: enterprise
   pullPolicy: IfNotPresent
 
 serviceAccount:
