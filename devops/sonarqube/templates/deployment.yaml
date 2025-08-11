@@ -34,22 +34,14 @@ spec:
 
           env:
             - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://192.168.8.22:30438/forsonardbt?sslmode=disable&currentSchema=public"
+              value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/forsonardb?sslmode=disable&currentSchema=public"
             - name: SONAR_JDBC_USERNAME
               value: "{{ .Values.postgres.username }}"
-            {{- if .Values.postgresExistingSecret }}
             - name: SONAR_JDBC_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "pg.secretName" . }}
                   key: {{ default "SONAR_DB_PASSWORD" .Values.postgres.existingSecretKey }}
-            {{- else }}
-            - name: SONAR_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "sonarqube.fullname" . }}-db
-                  key: SONAR_DB_PASSWORD
-            {{- end }}
 
           {{- if .Values.env }}
           {{- range .Values.env }}
