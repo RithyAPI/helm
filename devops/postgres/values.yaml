@@ -35,10 +35,10 @@ autoscaling:
 # Database bootstrap (standard postgres envs)
 postgres:
   db: sonarqube
-  user: admin
-  # Password comes from Secret (see templates/secret.yaml)
-  existingSecretName: ""        # if you already have a secret, set it and ignore templates/secret.yaml
-  existingSecretKey: POSTGRES_PASSWORD
+  user: sonar
+  password: "Ut12345678!"      # static password
+  existingSecretName: ""       # must be empty so Helm doesn't expect an external secret
+  existingSecretKey: ""        # must be empty too
 
 # NGINX TCP mapping (disabled by default)
 ingress:

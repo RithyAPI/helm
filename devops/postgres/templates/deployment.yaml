@@ -42,8 +42,8 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ if .Values.postgres.existingSecretName }}{{ .Values.postgres.existingSecretName }}{{ else }}{{ include "pg.fullname" . }}-db{{ end }}
-                  key: {{ .Values.postgres.existingSecretKey | default "POSTGRES_PASSWORD" }}
+                  name: {{ include "chart.fullname" . }}-postgresql
+                  key: POSTGRES_PASSWORD
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
