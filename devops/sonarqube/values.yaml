@@ -27,7 +27,7 @@ postgres:
   enabled: true
   host: "postgresql-postgresql.default.svc.cluster.local"
   port: 5432
-  database: "sonarqube"
+  database: "postgres"
   username: "sonar"
   password: "Ut12345678!"   # or use a Secret (below)
 
