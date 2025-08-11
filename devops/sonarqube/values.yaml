@@ -2,7 +2,7 @@ replicas: 1
 
 image:
   repository: sonarqube
-  tag: latest
+  tag: "24.12"
   pullPolicy: IfNotPresent
 
 serviceAccount:
