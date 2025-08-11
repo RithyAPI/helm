@@ -28,8 +28,8 @@ postgres:
   host: "postgresql-postgresql.default.svc.cluster.local"
   port: 5432
   database: "forsonardbt"
-  username: "sonar_sq"
-  password: "U3Ryb25nUEBzc3cwcmQ="   # or use a Secret (below)
+  username: "sonar"
+  password: "Ut12345678!"   # or use a Secret (below)
 
 persistence:
   enabled: true
