@@ -1,0 +1,65 @@
+replicas: 1
+persistence:
+  enabled: true
+  existingClaim: ""              # ensure chart will create it
+  claimName: my-jenkins-pvc      # NEW name
+  size: 50Gi
+  accessModes: [ReadWriteOnce]
+  storageClass: local-path
+image:
+  repository: jenkins/jenkins
+  tag: lts
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 30080
+  nodePortHttp: 32070
+  nodePortAgent: 32000
+
+serviceAccount:
+  create: true
+  name: ""
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: jenkins.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# Health probes (Jenkins boots slow on first start)
+readinessProbe:
+  initialDelaySeconds: 120
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 30
+
+livenessProbe:
+  initialDelaySeconds: 180
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+# Pod-level security (matches Jenkins UID/GID)
+securityContext:
+  fsGroup: 1000
+  runAsUser: 1000
