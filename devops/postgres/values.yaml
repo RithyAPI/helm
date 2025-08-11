@@ -18,10 +18,11 @@ service:
 
 # PVC used by deployment.yaml
 persistence:
-  existingClaim: ""              # leave empty to let the chart create one named <release>-postgresql-data
+  enabled: true
+  existingClaim: ""        # leave empty so chart creates <fullname>-data
   size: 10Gi
-  storageClass: local-path
   accessModes: [ReadWriteOnce]
+  storageClass: local-path
 
 autoscaling:
   enabled: false
