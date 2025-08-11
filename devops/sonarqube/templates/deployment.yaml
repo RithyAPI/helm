@@ -74,10 +74,19 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.dataClaimName | default (printf "%s-data" (include "sonarqube.fullname" .)) }}
+            claimName: {{ .Values.persistence.dataClaimName | default "sonarqube-data" }}
         - name: logs
+          {{- if .Values.persistence.logsClaimName }}
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.logsClaimName | default (printf "%s-logs" (include "sonarqube.fullname" .)) }}
+            claimName: {{ .Values.persistence.logsClaimName }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         - name: extensions
+          {{- if .Values.persistence.extensionsClaimName }}
           persistentVolumeClaim:
-            claimName: {{ .Values.persistence.extensionsClaimName | default (printf "%s-extensions" (include "sonarqube.fullname" .)) }}
+            claimName: {{ .Values.persistence.extensionsClaimName }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+

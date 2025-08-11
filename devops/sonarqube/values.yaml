@@ -84,3 +84,12 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationPercentage: 80
+
+volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: sonarqube-data
+  - name: logs
+    emptyDir: {}
+  - name: extensions
+    emptyDir: {}
