@@ -1,21 +1,23 @@
-{{- if .Values.ingress.enabled -}}
+{{- $ing := .Values.ingress | default dict -}}
+{{- if ($ing.enabled | default false) -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "nexus.fullname" . }}
+  name: {{ include "nexus.fullname" . }}-ingress
   labels:
     {{- include "nexus.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with ($ing.annotations | default dict) }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.ingress.className }}
+  {{- with ($ing.className | default "") }}
   ingressClassName: {{ . }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+  {{- $tls := ($ing.tls | default list) }}
+  {{- if $tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range $tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -24,18 +26,16 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    {{- range $h := ($ing.hosts | default list) }}
+    - host: {{ $h.host | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
+          {{- range $p := ($h.paths | default list) }}
+          - path: {{ $p.path }}
+            pathType: {{ $p.pathType | default "ImplementationSpecific" }}
             backend:
               service:
-                name: {{ include "nexus.fullname" $ }}
+                name: {{ include "nexus.fullname" $ }}-svc
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
