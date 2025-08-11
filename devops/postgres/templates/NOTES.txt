@@ -1,0 +1,11 @@
+PostgreSQL installed.
+
+Service DNS:
+  {{ include "pg.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+
+Connect:
+  host: {{ include "pg.fullname" . }}
+  port: {{ .Values.service.port | default 5432 }}
+  db:   {{ .Values.postgres.db }}
+  user: {{ .Values.postgres.user }}
+  pass: (from secret) {{ if .Values.postgres.existingSecretName }}{{ .Values.postgres.existingSecretName }}{{ else }}{{ include "pg.fullname" . }}-db{{ end }} / POSTGRES_PASSWORD

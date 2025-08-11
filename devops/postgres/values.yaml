@@ -1,0 +1,60 @@
+replicas: 1
+
+image:
+  repository: postgres
+  tag: "15"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automount: false
+
+service:
+  type: ClusterIP
+  port: 5432
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "local-path"   # set to your class or leave empty for default
+  accessModes:
+    - ReadWriteOnce
+
+# Database bootstrap (standard postgres envs)
+postgres:
+  db: sonarqube
+  user: sonar
+  # Password comes from Secret (see templates/secret.yaml)
+  existingSecretName: ""        # if you already have a secret, set it and ignore templates/secret.yaml
+  existingSecretKey: POSTGRES_PASSWORD
+
+# Optional: run *.sql/*.sh on first start (files put into /docker-entrypoint-initdb.d)
+initdb:
+  enabled: true
+  scripts: |
+    -- Example: extra SQL executed on first boot
+    -- GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.db }} TO {{ .Values.postgres.user }};
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "2Gi"
+
+securityContext:
+  fsGroup: 999       # postgres image uses uid 999
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroupChangePolicy: OnRootMismatch
+
+probes:
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 20
+    periodSeconds: 10
