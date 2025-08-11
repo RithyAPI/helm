@@ -29,11 +29,11 @@ persistence:
 
 resources:
   requests:
-    cpu: "200m"
-    memory: "2Gi"
-  limits:
-    cpu: "1"
+    cpu: "400m"
     memory: "4Gi"
+  limits:
+    cpu: "2"
+    memory: "8Gi"
 
 securityContext:
   runAsUser: 200
