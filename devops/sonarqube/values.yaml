@@ -25,11 +25,11 @@ ingress:
 
 postgres:
   enabled: true
-  host: postgresql-postgresql.default.svc.cluster.local
+  host: "postgresql-postgresql.default.svc.cluster.local"
   port: 5432
   database: "sonarqube"
   username: "sonar"
-  password: "Ut12345678!"   # static password you just set
+  password: "Ut12345678!"   # or use a Secret (below)
 
 persistence:
   enabled: true
