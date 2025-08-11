@@ -12,9 +12,11 @@ serviceAccount:
   annotations: {}
   automount: false
 
+# values.yaml for your postgres chart
 service:
-  type: ClusterIP
+  type: NodePort
   port: 5432
+  nodePort: 30438   # choose any free port in 30000-32767
 
 # PVC used by deployment.yaml
 persistence:
@@ -33,7 +35,7 @@ autoscaling:
 # Database bootstrap (standard postgres envs)
 postgres:
   db: sonarqube
-  user: sonar
+  user: admin
   # Password comes from Secret (see templates/secret.yaml)
   existingSecretName: ""        # if you already have a secret, set it and ignore templates/secret.yaml
   existingSecretKey: POSTGRES_PASSWORD
