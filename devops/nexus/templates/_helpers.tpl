@@ -1,14 +1,16 @@
-{{/* Common fullname builder */}}
-{{- define "common.fullname" -}}
+{{/* ---- Common helpers (single source of truth) ---- */}}
+
+{{- define "app.fullname" -}}
 {{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{/* Back-compat: chart started as "nexus"; keep this name so tests and old templates work */}}
-{{- define "nexus.fullname" -}}
-{{- template "common.fullname" . -}}
+{{- define "app.labels" -}}
+app.kubernetes.io/name: {{ .Chart.Name }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{/* Optional alias if you start switching templates to "nexus.fullname" later */}}
-{{- define "nexus.fullname" -}}
-{{- template "common.fullname" . -}}
-{{- end -}}
+{{/* Back-compat aliases: use these names in existing templates if you like */}}
+{{- define "jenkins.fullname" -}} {{ template "app.fullname" . }} {{- end -}}
+{{- define "jenkins.labels" -}} {{ template "app.labels" . }} {{- end -}}
+{{- define "nexus.fullname" -}} {{ template "app.fullname" . }} {{- end -}}
+{{- define "nexus.labels" -}} {{ template "app.labels" . }} {{- end -}}
