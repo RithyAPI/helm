@@ -19,17 +19,21 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+
+      # Wait for PostgreSQL to answer before starting SonarQube
       initContainers:
         - name: wait-for-db
-          image: busybox:1.36
+          image: postgres:15
           command: ["sh","-c"]
           args:
             - |
+              echo "Waiting for Postgres at postgresql-postgresql.default.svc.cluster.local:5432...";
               for i in $(seq 1 60); do
-                (echo >/dev/tcp/postgresql-postgresql.default.svc.cluster.local/5432) >/dev/null 2>&1 && exit 0
+                pg_isready -h postgresql-postgresql.default.svc.cluster.local -p 5432 -d sonarqube -U {{ .Values.postgres.username }} && exit 0
                 echo "DB not ready ($i/60)"; sleep 2;
               done
-              exit 1
+              echo "DB never became ready"; exit 1
+
       containers:
         - name: sonarqube
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -37,6 +41,7 @@ spec:
           ports:
             - name: http
               containerPort: 9000
+
           env:
             - name: SONAR_JDBC_URL
               value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/sonarqube?sslmode=disable&currentSchema=public"
@@ -44,17 +49,24 @@ spec:
               value: "{{ .Values.postgres.username }}"
             - name: SONAR_JDBC_PASSWORD
               value: "{{ .Values.postgres.password }}"
+
           readinessProbe:
-            httpGet: { path: /, port: 9000 }
+            httpGet:
+              path: /
+              port: 9000
             initialDelaySeconds: 20
             periodSeconds: 10
           livenessProbe:
-            httpGet: { path: /, port: 9000 }
+            httpGet:
+              path: /
+              port: 9000
             initialDelaySeconds: 60
             periodSeconds: 20
+
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
+
           volumeMounts:
             - name: data
               mountPath: /opt/sonarqube/data
@@ -62,6 +74,7 @@ spec:
               mountPath: /opt/sonarqube/logs
             - name: extensions
               mountPath: /opt/sonarqube/extensions
+
       volumes:
         - name: data
           emptyDir: {}        # swap to PVC after it works
