@@ -3,7 +3,7 @@ tests:
   enabled: false
 image:
   repository: postgres
-  tag: "latest"
+  tag: "15"
   pullPolicy: IfNotPresent
 
 serviceAccount:

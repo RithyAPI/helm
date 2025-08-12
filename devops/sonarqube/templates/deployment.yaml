@@ -3,72 +3,49 @@ kind: Deployment
 metadata:
   name: {{ include "sonarqube.fullname" . }}
   labels:
-    app.kubernetes.io/name: sonarqube
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "sonarqube.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: sonarqube
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "sonarqube.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: sonarqube
-        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "sonarqube.selectorLabels" . | nindent 8 }}
     spec:
-      securityContext:
-        fsGroup: 0
-      initContainers:
-        - name: wait-for-db
-          image: postgres:15
-          command: ["sh","-c"]
-          args:
-            - |
-              echo "Waiting for Postgres at postgresql-postgresql.default.svc.cluster.local:5432...";
-              for i in $(seq 1 60); do
-                pg_isready -h postgresql-postgresql.default.svc.cluster.local -p 5432 -d sonarqube -U {{ .Values.postgres.username }} && exit 0
-                echo "DB not ready ($i/60)"; sleep 2;
-              done
-              echo "DB never became ready"; exit 1
-
       containers:
-        - name: sonarqube
+        - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range .Values.sonarqube.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 9000
-          env:
-            - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/sonarqube?sslmode=disable&currentSchema=public"
-            - name: SONAR_JDBC_USERNAME
-              value: "{{ .Values.postgres.username }}"
-            - name: SONAR_JDBC_PASSWORD
-              value: "{{ .Values.postgres.password }}"
-          readinessProbe:
-            httpGet: { path: /, port: 9000 }
-            initialDelaySeconds: 20
-            periodSeconds: 10
-          livenessProbe:
-            httpGet: { path: /, port: 9000 }
-            initialDelaySeconds: 60
-            periodSeconds: 20
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 0
-            allowPrivilegeEscalation: false
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: data
+            - name: sonarqube-data
               mountPath: /opt/sonarqube/data
-            - name: logs
-              mountPath: /opt/sonarqube/logs
-            - name: extensions
+            - name: sonarqube-extensions
               mountPath: /opt/sonarqube/extensions
       volumes:
-        - name: data
+        - name: sonarqube-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "sonarqube.fullname" . }}-data
+          {{- else }}
           emptyDir: {}
-        - name: logs
+          {{- end }}
+        - name: sonarqube-extensions
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "sonarqube.fullname" . }}-extensions
+          {{- else }}
           emptyDir: {}
-        - name: extensions
-          emptyDir: {}
+          {{- end }}
