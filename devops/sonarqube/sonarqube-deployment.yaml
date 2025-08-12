@@ -3,36 +3,42 @@ kind: Deployment
 metadata:
   name: sonarqube
   namespace: sonarqube
-  labels:
-    app: sonarqube
+  labels: { app: sonarqube }
 spec:
   replicas: 1
   strategy:
-    type: Recreate
+    type: Recreate   # safer for embedded ES data
   selector:
     matchLabels: { app: sonarqube }
   template:
     metadata:
       labels: { app: sonarqube }
     spec:
+      # image expects UID 1000 with root group (gid 0)
       securityContext:
         fsGroup: 0
+
+      # wait for Postgres to be ready
       initContainers:
         - name: wait-for-db
           image: postgres:15
+          env:
+            - name: DB_HOST
+              value: postgres.sonarqube.svc.cluster.local
+            - name: DB_NAME
+              valueFrom: { secretKeyRef: { name: sonarqube-db, key: database } }
+            - name: DB_USER
+              valueFrom: { secretKeyRef: { name: sonarqube-db, key: username } }
           command: ["sh","-c"]
           args:
             - |
               echo "Waiting for Postgres…";
               for i in $(seq 1 60); do
-                pg_isready -h postgresql-postgresql.default.svc.cluster.local -p 5432 -d sonarqube -U "$(cat /db/username)" && exit 0
+                pg_isready -h "$DB_HOST" -p 5432 -d "$DB_NAME" -U "$DB_USER" && exit 0
                 echo "DB not ready ($i/60)"; sleep 2;
               done
               echo "DB never became ready"; exit 1
-          volumeMounts:
-            - name: db-secret
-              mountPath: /db
-              readOnly: true
+
       containers:
         - name: sonarqube
           image: sonarqube:community
@@ -42,20 +48,11 @@ spec:
               containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sonarqube-db
-                  key: jdbcUrl
+              value: "jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube?sslmode=disable&currentSchema=public"
             - name: SONAR_JDBC_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: sonarqube-db
-                  key: username
+              valueFrom: { secretKeyRef: { name: sonarqube-db, key: username } }
             - name: SONAR_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sonarqube-db
-                  key: password
+              valueFrom: { secretKeyRef: { name: sonarqube-db, key: password } }
           readinessProbe:
             httpGet: { path: /, port: 9000 }
             initialDelaySeconds: 25
@@ -77,8 +74,8 @@ spec:
               mountPath: /opt/sonarqube/logs
       volumes:
         - name: data
-          emptyDir: {}
+          persistentVolumeClaim: { claimName: sonarqube-data }
         - name: extensions
-          emptyDir: {}
+          persistentVolumeClaim: { claimName: sonarqube-extensions }
         - name: logs
-          emptyDir: {}
+          persistentVolumeClaim: { claimName: sonarqube-logs }

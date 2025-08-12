@@ -5,8 +5,7 @@ metadata:
   namespace: sonarqube
 spec:
   type: ClusterIP
-  selector:
-    app: sonarqube
+  selector: { app: sonarqube }
   ports:
     - name: http
       port: 9000

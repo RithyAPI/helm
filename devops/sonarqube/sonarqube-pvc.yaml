@@ -1,35 +1,35 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-data-lp
+  name: sonarqube-data
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 20Gi
-  storageClassName: local-path
+  storageClassName: local-path   # <== CHANGE if needed
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-extensions-lp
+  name: sonarqube-extensions
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 5Gi
-  storageClassName: local-path
+  storageClassName: local-path   # <== CHANGE if needed
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-logs-lp
+  name: sonarqube-logs
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
     requests:
       storage: 2Gi
-  storageClassName: local-path
+  storageClassName: local-path   # <== CHANGE if needed
