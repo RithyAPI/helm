@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   repository: sonarqube
-  tag: "10.6.0-community"  # Use the desired SonarQube version
+  tag: "latest"  # Use the desired SonarQube version
   pullPolicy: IfNotPresent
 
 service:
