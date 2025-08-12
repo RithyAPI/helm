@@ -1,18 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sonarqube.fullname" . }}
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sonarqube
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sonarqube
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      securityContext:
+        fsGroup: 1000
       initContainers:
         - name: wait-for-db
           image: busybox:1.36
-          command: ['sh','-c']
+          command: ["sh","-c"]
           args:
             - |
-              echo "Waiting for DB at postgresql-postgresql.default.svc.cluster.local:5432";
               for i in $(seq 1 60); do
-                (echo > /dev/tcp/postgresql-postgresql.default.svc.cluster.local/5432) >/dev/null 2>&1 && exit 0
+                (echo >/dev/tcp/postgresql-postgresql.default.svc.cluster.local/5432) >/dev/null 2>&1 && exit 0
                 echo "DB not ready ($i/60)"; sleep 2;
               done
-              echo "DB never became ready"; exit 1
+              exit 1
       containers:
         - name: sonarqube
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -38,5 +55,17 @@ spec:
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
-      securityContext:
-        fsGroup: 1000
+          volumeMounts:
+            - name: data
+              mountPath: /opt/sonarqube/data
+            - name: logs
+              mountPath: /opt/sonarqube/logs
+            - name: extensions
+              mountPath: /opt/sonarqube/extensions
+      volumes:
+        - name: data
+          emptyDir: {}        # swap to PVC after it works
+        - name: logs
+          emptyDir: {}
+        - name: extensions
+          emptyDir: {}
