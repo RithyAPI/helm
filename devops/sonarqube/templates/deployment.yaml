@@ -41,7 +41,7 @@ spec:
               containerPort: 9000
           env:
             - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/sonarqube2?sslmode=disable&currentSchema=public"
+              value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/sonarqube?sslmode=disable&currentSchema=public"
             - name: SONAR_JDBC_USERNAME
               value: "{{ .Values.postgres.username }}"
             - name: SONAR_JDBC_PASSWORD
