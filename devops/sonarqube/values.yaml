@@ -28,7 +28,7 @@ resources:
 
 persistence:
   enabled: true
-  storageClass: ""  # Specify your storage class if needed
+  storageClass: "local-path"  # Specify your storage class if needed
   size: 8Gi
 
 ingress:
