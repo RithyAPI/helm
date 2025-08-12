@@ -27,9 +27,9 @@ postgres:
   enabled: true
   host: "postgresql-postgresql.default.svc.cluster.local"
   port: 5432
-  database: "forsonardb"
+  database: "sonarqube"
   username: "sonar"
-  password: "Ut12345678!"   # or use a Secret (below)
+  password: "Ut12345678!"
 
 persistence:
   enabled: true
