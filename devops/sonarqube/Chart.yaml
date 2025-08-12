@@ -1,5 +1,0 @@
-apiVersion: v2
-name: sonarqube
-description: A Helm chart for deploying SonarQube with PostgreSQL
-version: 0.1.0
-appVersion: "10.6.0"  # Use the desired SonarQube version
