@@ -1,56 +1,81 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "sonarqube.fullname" . }}
+  name: sonarqube
+  namespace: default
   labels:
-    {{- include "sonarqube.labels" . | nindent 4 }}
+    app: sonarqube
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      {{- include "sonarqube.selectorLabels" . | nindent 6 }}
+      app: sonarqube
   template:
     metadata:
       labels:
-        {{- include "sonarqube.selectorLabels" . | nindent 8 }}
+        app: sonarqube
     spec:
+      initContainers:
+      - name: init-db
+        image: postgres:13
+        command: ['sh', '-c', 'until pg_isready -h postgresql-postgresql.default.svc.cluster.local -p 5432 -U sonar; do echo waiting for database; sleep 2; done;']
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: SONAR_JDBC_URL
-              value: "jdbc:postgresql://{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}"
-            - name: SONAR_JDBC_USERNAME
-              value: "{{ .Values.postgresql.username }}"
-            - name: SONAR_JDBC_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "sonarqube.fullname" . }}-secret
-                  key: postgres-password
-          ports:
-            - name: http
-              containerPort: 9000
-              protocol: TCP
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: sonarqube-data
-              mountPath: /opt/sonarqube/data
-            - name: sonarqube-extensions
-              mountPath: /opt/sonarqube/extensions
-      volumes:
+      - name: sonarqube
+        image: sonarqube:24.12.0.100206-community
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+          name: http
+        env:
+        - name: SONAR_JDBC_URL
+          value: "jdbc:postgresql://postgresql-postgresql.default.svc.cluster.local:5432/sonarqube"
+        - name: SONAR_JDBC_USERNAME
+          value: "sonar"
+        - name: SONAR_JDBC_PASSWORD
+          value: "Ut12345678!"
+        - name: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+          value: "true"
+        livenessProbe:
+          httpGet:
+            path: /api/system/status
+            port: 9000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /api/system/status
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 3
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          fsGroup: 1000
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1000m"
+        volumeMounts:
         - name: sonarqube-data
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "sonarqube.fullname" . }}-data
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
+          mountPath: /opt/sonarqube/data
+        - name: sonarqube-logs
+          mountPath: /opt/sonarqube/logs
         - name: sonarqube-extensions
-          {{- if .Values.persistence.enabled }}
-          persistentVolumeClaim:
-            claimName: {{ include "sonarqube.fullname" . }}-extensions
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
+          mountPath: /opt/sonarqube/extensions
+      volumes:
+      - name: sonarqube-data
+        persistentVolumeClaim:
+          claimName: sonarqube-data-pvc
+      - name: sonarqube-logs
+        persistentVolumeClaim:
+          claimName: sonarqube-logs-pvc
+      - name: sonarqube-extensions
+        persistentVolumeClaim:
+          claimName: sonarqube-extensions-pvc
