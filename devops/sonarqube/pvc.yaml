@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-data
+  name: sonarqube-data-lp
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
@@ -13,7 +13,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-extensions
+  name: sonarqube-extensions-lp
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
@@ -25,7 +25,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: sonarqube-logs
+  name: sonarqube-logs-lp
   namespace: sonarqube
 spec:
   accessModes: ["ReadWriteOnce"]
