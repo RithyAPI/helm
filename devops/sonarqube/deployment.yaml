@@ -77,17 +77,8 @@ spec:
               mountPath: /opt/sonarqube/logs
       volumes:
         - name: data
-          persistentVolumeClaim:
-            claimName: sonarqube-data
+          emptyDir: {}
         - name: extensions
-          persistentVolumeClaim:
-            claimName: sonarqube-extensions
+          emptyDir: {}
         - name: logs
-          persistentVolumeClaim:
-            claimName: sonarqube-logs
-        - name: db-secret
-          secret:
-            secretName: sonarqube-db
-            items:
-              - key: username
-                path: username
+          emptyDir: {}
