@@ -19,10 +19,15 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- range .Values.sonarqube.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote }}
-            {{- end }}
+            - name: SONAR_JDBC_URL
+              value: "jdbc:postgresql://{{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}/{{ .Values.postgresql.database }}"
+            - name: SONAR_JDBC_USERNAME
+              value: "{{ .Values.postgresql.username }}"
+            - name: SONAR_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "sonarqube.fullname" . }}-secret
+                  key: postgres-password
           ports:
             - name: http
               containerPort: 9000
