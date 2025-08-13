@@ -1,0 +1,7 @@
+apiVersion: v2
+name: jaeger
+description: Jaeger all-in-one (dev/demo) via a minimal Helm chart
+type: application
+version: 0.1.0
+appVersion: "1.57.0" # set to a recent Jaeger tag you prefer
+kubeVersion: ">=1.22.0-0"

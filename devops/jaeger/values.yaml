@@ -1,0 +1,85 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: jaegertracing/all-in-one
+  tag: "1.57.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: ""                 # leave empty to auto-name
+  annotations: {}          # e.g. iam.gke.io/gcp-service-account: ...
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70     # set null to skip
+  targetMemoryUtilizationPercentage: 80  # set null to skip
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+service:
+  type: ClusterIP
+  annotations: {}
+  # Expose these ports; UI is 16686
+  ports:
+    - name: query
+      port: 16686
+      targetPort: 16686
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+    - name: jaeger-thrift
+      port: 14268
+      targetPort: 14268
+    - name: jaeger-grpc
+      port: 14250
+      targetPort: 14250
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: jaeger.local.example
+      paths:
+        - path: /
+          pathType: Prefix
+          servicePort: 16686
+  tls: []
+  # - secretName: jaeger-tls
+  #   hosts: [jaeger.local.example]
+
+storage:
+  mode: "memory"    # memory | badger
+  memoryMaxTraces: 50000
+
+  badger:
+    enabled: false          # auto-derived from mode, but you can force
+    ephemeral: false
+    dataDir: /badger/data
+    indexDir: /badger/index
+
+persistence:
+  enabled: false            # turn on only if storage.mode=badger and you want persistence
+  accessModes: ["ReadWriteOnce"]
+  size: 5Gi
+  storageClass: ""          # e.g. local-path / nfs / gp2; leave empty to use default
+  existingClaim: ""         # if you already created a PVC, set its name here

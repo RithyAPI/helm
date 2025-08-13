@@ -1,0 +1,7 @@
+Jaeger UI:
+  kubectl port-forward svc/{{ include "jaeger.fullname" . }} 16686:16686
+  Open http://localhost:16686
+
+OTLP endpoints:
+  gRPC: svc/{{ include "jaeger.fullname" . }}:4317
+  HTTP: svc/{{ include "jaeger.fullname" . }}:4318
