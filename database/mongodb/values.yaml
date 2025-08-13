@@ -15,7 +15,7 @@ auth:
   existingSecret: ""             # if set, skip creating secret; keys: username, password
 
 service:
-  type: ClusterIP   # change to NodePort if you want external access
+  type: NodePort   # change to NodePort if you want external access
   nodePort: 30460       # set a concrete port like 31317 if type=NodePort
   port: 27017
   annotations: {}
