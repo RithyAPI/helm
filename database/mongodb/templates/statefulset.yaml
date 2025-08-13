@@ -16,12 +16,17 @@ spec:
       labels:
         {{- include "mongodb.labels" . | nindent 8 }}
     spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ default (include "mongodb.fullname" .) .Values.serviceAccount.name }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: mongo
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --bind_ip_all
           ports:
             - name: mongo
               containerPort: {{ .Values.service.port }}
@@ -30,13 +35,14 @@ spec:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (include "mongodb.fullname" .) .Values.auth.rootUser }}
+                  name: {{ default (include "mongodb.fullname" .) .Values.auth.existingSecret }}
                   key: username
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (include "mongodb.fullname" .) .Values.auth.rootPassword }}
+                  name: {{ default (include "mongodb.fullname" .) .Values.auth.existingSecret }}
                   key: password
+            {{- end }}
           volumeMounts:
             - name: data
               mountPath: /data/db
@@ -46,12 +52,22 @@ spec:
             {{- end }}
           readinessProbe:
             exec:
-              command: ["sh","-c","mongosh --eval 'db.adminCommand({ ping: 1 })' {{- if .Values.auth.enabled }} -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin {{- end }}"]
+              command:
+                - sh
+                - -c
+                - >
+                  mongosh --eval 'db.adminCommand({ ping: 1 })'
+                  {{- if .Values.auth.enabled }} -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin {{- end }}
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             exec:
-              command: ["sh","-c","mongosh --eval 'db.adminCommand({ ping: 1 })' {{- if .Values.auth.enabled }} -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin {{- end }}"]
+              command:
+                - sh
+                - -c
+                - >
+                  mongosh --eval 'db.adminCommand({ ping: 1 })'
+                  {{- if .Values.auth.enabled }} -u "$MONGO_INITDB_ROOT_USERNAME" -p "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin {{- end }}
             initialDelaySeconds: 30
             periodSeconds: 20
           resources:
@@ -69,7 +85,12 @@ spec:
         labels:
           {{- include "mongodb.labels" . | nindent 10 }}
       spec:
-        accessModes: {{- toYaml .Values.persistence.accessModes | nindent 8 }}
+        accessModes:
+          {{- if .Values.persistence.accessModes }}
+          {{- toYaml .Values.persistence.accessModes | nindent 10 }}
+          {{- else }}
+          - ReadWriteOnce
+          {{- end }}
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
