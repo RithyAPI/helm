@@ -28,15 +28,9 @@ spec:
           env:
             {{- if .Values.auth.enabled }}
             - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (include "mongodb.fullname" .) .Values.auth.existingSecret }}
-                  key: username
+              value: {{ .Values.auth.username | quote }}
             - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ default (include "mongodb.fullname" .) .Values.auth.existingSecret }}
-                  key: password
+              value: {{ .Values.auth.password | quote }}
             {{- end }}
           volumeMounts:
             - name: data
