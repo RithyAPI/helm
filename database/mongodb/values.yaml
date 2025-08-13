@@ -10,8 +10,8 @@ replicaCount: 1  # single node
 
 auth:
   enabled: true
-  username: admin
-  password: "Ut12345678!"   # for demo; override via --set or external secret
+  rootUser: admin
+  rootPassword: "Ut12345678!"   # for demo; override via --set or external secret
   existingSecret: ""             # if set, skip creating secret; keys: username, password
 
 service:

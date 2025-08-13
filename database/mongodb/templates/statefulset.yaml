@@ -28,9 +28,9 @@ spec:
           env:
             {{- if .Values.auth.enabled }}
             - name: MONGO_INITDB_ROOT_USERNAME
-              value: {{ .Values.auth.username | quote }}
+              value: {{ .Values.auth.rootUser | quote }}
             - name: MONGO_INITDB_ROOT_PASSWORD
-              value: {{ .Values.auth.password | quote }}
+              value: {{ .Values.auth.rootPassword | quote }}
             {{- end }}
           volumeMounts:
             - name: data
