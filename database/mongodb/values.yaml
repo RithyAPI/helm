@@ -1,0 +1,69 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: mongo
+  tag: "7.0.14"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1  # single node
+
+auth:
+  enabled: true
+  rootUser: admin
+  rootPassword: "ChangeMe123!"   # for demo; override via --set or external secret
+  existingSecret: ""             # if set, skip creating secret; keys: username, password
+
+service:
+  type: ClusterIP   # change to NodePort if you want external access
+  nodePort: 0       # set a concrete port like 31317 if type=NodePort
+  port: 27017
+  annotations: {}
+
+headlessService:
+  enabled: true
+  nameSuffix: "headless"
+
+serviceAccount:
+  create: true
+  name: ""            # auto-name if empty
+  annotations: {}
+
+autoscaling:
+  enabled: false      # HPA is OFF by default for DBs (not recommended)
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: null
+
+persistence:
+  enabled: true
+  accessModes: ["ReadWriteOnce"]
+  size: 10Gi
+  storageClass: ""    # e.g., local-path
+  existingClaim: ""   # set if you already created a PVC (used by Deployment option)
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+podSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+init:
+  enabled: true
+  scripts:
+    create_db_js: |
+      // Example: create app DB/user (runs only on first start)
+      db = db.getSiblingDB("appdb");
+      db.createUser({user: "appuser", pwd: "AppUser!234", roles: ["readWrite"]});

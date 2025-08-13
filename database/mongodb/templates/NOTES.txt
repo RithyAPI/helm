@@ -1,0 +1,13 @@
+MongoDB service:
+  Name: {{ include "mongodb.fullname" . }}
+  Port: {{ .Values.service.port }}
+
+Connection (inside cluster):
+  mongodb://{{ if .Values.auth.enabled }}{{ index .Values "auth" "rootUser" }}:******@{{ end }}{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/admin
+
+If NodePort enabled:
+  http(s)://<node-ip>:{{ .Values.service.nodePort }}  (Mongo listens on TCP only)
+
+First shell (from any pod with mongosh):
+  kubectl -n {{ .Release.Namespace }} run mclient --rm -it --image=mongo:{{ .Chart.AppVersion }} -- bash
+  mongosh "mongodb://{{ if .Values.auth.enabled }}$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@{{ end }}{{ include "mongodb.fullname" . }}:{{ .Values.service.port }}/admin"

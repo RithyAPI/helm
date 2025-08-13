@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mongodb.fullname" . }}
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.service.annotations | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "mongodb.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: mongo
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      {{- if and (eq .Values.service.type "NodePort") (ne (int .Values.service.nodePort) 0) }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- end }}

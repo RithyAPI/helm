@@ -1,0 +1,11 @@
+{{- if and .Values.init.enabled .Values.auth.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mongodb.fullname" . }}-init
+  labels:
+    {{- include "mongodb.labels" . | nindent 4 }}
+data:
+  01-init.js: |
+{{ .Values.init.scripts.create_db_js | indent 4 }}
+{{- end }}
