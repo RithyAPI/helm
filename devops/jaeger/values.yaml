@@ -33,13 +33,12 @@ tolerations: []
 affinity: {}
 
 service:
-  type: ClusterIP
-  annotations: {}
-  # Expose these ports; UI is 16686
+  type: NodePort            # or LoadBalancer
   ports:
     - name: query
       port: 16686
       targetPort: 16686
+      nodePort: 31686       # only used when type=NodePort
     - name: otlp-grpc
       port: 4317
       targetPort: 4317
