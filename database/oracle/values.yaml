@@ -52,12 +52,27 @@ initSql:
              #   CREATE USER demo IDENTIFIED BY "demo";
              #   GRANT CONNECT, RESOURCE TO demo;
 
-# -- Probes (XE takes time to start; be generous)
+# --- Probes: give Oracle enough time on first boot
+podSecurityContext:
+  enabled: true
+  fsGroup: 54321
+  fsGroupChangePolicy: OnRootMismatch
+
 probes:
-  initialDelaySeconds: 60
+  # legacy keys you already had:
   periodSeconds: 15
   timeoutSeconds: 5
   failureThreshold: 20
+  initialDelaySeconds: 60  # (not used now; replaced by the two below)
+  # new keys (safer defaults for Oracle first boot):
+  readinessInitialDelay: 900
+  livenessInitialDelay: 1200
+  startup:
+    enabled: true
+    tcpPort: 1521
+    periodSeconds: 10
+    failureThreshold: 120
+    timeoutSeconds: 5
 
 serviceAccount:
   create: false

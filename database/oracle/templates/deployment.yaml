@@ -8,10 +8,9 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "oracle-db.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "oracle-db.selectorLabels" . | nindent 6 }}
   strategy:
-    type: Recreate   # database container; avoid two instances using same PVC
+    type: Recreate   # database container; avoid two pods using the same PVC
   template:
     metadata:
       labels:
@@ -23,6 +22,18 @@ spec:
         - name: {{ . }}
       {{- end }}
       {{- end }}
+
+      {{- /* Optional pod security context for PVC permissions (e.g., local-path) */}}
+      {{- if and .Values.podSecurityContext .Values.podSecurityContext.enabled }}
+      securityContext:
+        {{- with .Values.podSecurityContext.fsGroup }}
+        fsGroup: {{ . }}
+        {{- end }}
+        {{- with .Values.podSecurityContext.fsGroupChangePolicy }}
+        fsGroupChangePolicy: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+
       containers:
         - name: oracle
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -30,6 +41,7 @@ spec:
           ports:
             - containerPort: 1521
               name: tcp-1521
+
           env:
             - name: ORACLE_PASSWORD
               valueFrom:
@@ -48,6 +60,7 @@ spec:
             - name: APP_USER_PASSWORD
               value: {{ required "APP_USER_PASSWORD required when APP_USER is set" .Values.env.APP_USER_PASSWORD | quote }}
             {{- end }}
+
           volumeMounts:
             - name: oradata
               mountPath: /opt/oracle/oradata
@@ -55,22 +68,53 @@ spec:
             - name: init-sql
               mountPath: /container-entrypoint-initdb.d
             {{- end }}
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
+          {{- /* === Probes ===
+                Backward-compat: falls back to your existing .Values.probes.*
+                You can also set .Values.probes.startup.enabled/periodSeconds/failureThreshold/timeoutSeconds
+          */}}
+
+          # Give Oracle time to initialize on first boot (unpack/create DB)
+          {{- $startupEnabled := (default true (dig "probes" "startup" "enabled" .Values)) -}}
+          {{- $startupPort := (default 1521 (dig "probes" "startup" "tcpPort" .Values)) -}}
+          {{- $startupPeriod := (default (default 10 (dig "probes" "periodSeconds" .Values)) (dig "probes" "startup" "periodSeconds" .Values)) -}}
+          {{- $startupFail := (default 120 (dig "probes" "startup" "failureThreshold" .Values)) -}}
+          {{- $startupTimeout := (default (default 5 (dig "probes" "timeoutSeconds" .Values)) (dig "probes" "startup" "timeoutSeconds" .Values)) -}}
+          {{- if $startupEnabled }}
+          startupProbe:
+            tcpSocket:
+              port: {{ $startupPort }}
+            periodSeconds: {{ $startupPeriod }}
+            failureThreshold: {{ $startupFail }}
+            timeoutSeconds: {{ $startupTimeout }}
+          {{- end }}
+
+          # Readiness (begin late)
+          {{- $readInit := (default 900 (dig "probes" "readinessInitialDelay" .Values)) -}}
+          {{- $period := (default 15 (dig "probes" "periodSeconds" .Values)) -}}
+          {{- $timeout := (default 5 (dig "probes" "timeoutSeconds" .Values)) -}}
+          {{- $fail := (default 20 (dig "probes" "failureThreshold" .Values)) -}}
           readinessProbe:
             tcpSocket:
-              port: 1521
-            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
-            periodSeconds: {{ .Values.probes.periodSeconds }}
-            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
-            failureThreshold: {{ .Values.probes.failureThreshold }}
+              port: {{ $startupPort }}
+            initialDelaySeconds: {{ $readInit }}
+            periodSeconds: {{ $period }}
+            timeoutSeconds: {{ $timeout }}
+            failureThreshold: {{ $fail }}
+
+          # Liveness (begin even later)
+          {{- $liveInit := (default 1200 (dig "probes" "livenessInitialDelay" .Values)) -}}
           livenessProbe:
             tcpSocket:
-              port: 1521
-            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 30 }}
-            periodSeconds: {{ .Values.probes.periodSeconds }}
-            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
-            failureThreshold: {{ .Values.probes.failureThreshold }}
+              port: {{ $startupPort }}
+            initialDelaySeconds: {{ $liveInit }}
+            periodSeconds: {{ $period }}
+            timeoutSeconds: {{ $timeout }}
+            failureThreshold: {{ $fail }}
+
       volumes:
         - name: oradata
           {{- if .Values.persistence.enabled }}
