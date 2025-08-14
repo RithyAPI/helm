@@ -43,8 +43,8 @@ env:
 
 # -- Put strong password via Secret, not plaintext
 # Create secret named <release>-oracle-credentials containing key ORACLE_PASSWORD
-existingSecretName: "Ut12345678!"  # leave empty to let chart create from .Values.oraclePassword (dev-only)
-oraclePassword: "Ut12345678!"      # dev-only; leave empty in prod
+existingSecretName: "abc"  # leave empty to let chart create from .Values.oraclePassword (dev-only)
+oraclePassword: "abc"      # dev-only; leave empty in prod
 
 # -- Optional: run SQL on first boot (ConfigMap with .sql files)
 initSql:
