@@ -39,7 +39,7 @@ env:
   ORACLE_DATABASE: "XEPDB1"
   ORACLE_CHARACTERSET: "AL32UTF8"   # optional
   APP_USER: "admin"                      # optional app user
-  APP_USER_PASSWORD: "Ut12345678!"             # optional app user password
+  APP_USER_PASSWORD: "abc"             # optional app user password
 
 # -- Put strong password via Secret, not plaintext
 # Create secret named <release>-oracle-credentials containing key ORACLE_PASSWORD
