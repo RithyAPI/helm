@@ -70,6 +70,9 @@ probes:
     periodSeconds: 10
     failureThreshold: 120
     timeoutSeconds: 5
+  # You can temporarily disable these if needed:
+  readinessEnabled: true
+  livenessEnabled: true
 
 serviceAccount:
   create: false

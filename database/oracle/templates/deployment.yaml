@@ -17,6 +17,7 @@ spec:
         {{- include "oracle-db.labels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: 600
+
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
       {{- range .Values.image.pullSecrets }}
@@ -38,6 +39,7 @@ spec:
         - name: oracle
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - containerPort: 1521
               name: tcp-1521
@@ -74,7 +76,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{- /* ---- Probes (no 'dig', nil-safe) ---- */}}
+          {{- /* ------ Probes (nil-safe) ------ */}}
           {{- $probes := .Values.probes | default dict -}}
           {{- $startup := (get $probes "startup") | default dict -}}
           {{- $startupEnabled := (default true (get $startup "enabled")) -}}
@@ -87,31 +89,37 @@ spec:
           {{- $startupPeriod := (coalesce (get $startup "periodSeconds") $period 10) -}}
           {{- $startupFail := (default 120 (get $startup "failureThreshold")) -}}
           {{- $startupTimeout := (coalesce (get $startup "timeoutSeconds") $timeout 5) -}}
+          {{- $readinessEnabled := (default true (get $probes "readinessEnabled")) -}}
+          {{- $livenessEnabled := (default true (get $probes "livenessEnabled")) -}}
 
           {{- if $startupEnabled }}
           startupProbe:
             tcpSocket:
               port: {{ $startupPort }}
             periodSeconds: {{ $startupPeriod }}
-            failureThreshold: {{ $startupFail }}   # ~20 min by default
+            failureThreshold: {{ $startupFail }}     # ~20 minutes by default
             timeoutSeconds: {{ $startupTimeout }}
           {{- end }}
 
+          {{- if $readinessEnabled }}
           readinessProbe:
             tcpSocket:
               port: {{ $startupPort }}
-            initialDelaySeconds: {{ $readInit }}   # default 900s
+            initialDelaySeconds: {{ $readInit }}     # 15 minutes default
             periodSeconds: {{ $period }}
             timeoutSeconds: {{ $timeout }}
             failureThreshold: {{ $fail }}
+          {{- end }}
 
+          {{- if $livenessEnabled }}
           livenessProbe:
             tcpSocket:
               port: {{ $startupPort }}
-            initialDelaySeconds: {{ $liveInit }}   # default 1200s
+            initialDelaySeconds: {{ $liveInit }}      # 20 minutes default
             periodSeconds: {{ $period }}
             timeoutSeconds: {{ $timeout }}
             failureThreshold: {{ $fail }}
+          {{- end }}
 
       volumes:
         - name: oradata
