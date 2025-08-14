@@ -1,5 +1,4 @@
-{{- $tests := .Values.tests | default dict -}}
-{{- if $tests.enabled }}
+{{- if .Values.tests.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -11,9 +10,9 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   restartPolicy: Never
-  {{- if .Values.image.pullSecrets }}
+  {{- with .Values.image.pullSecrets }}
   imagePullSecrets:
-  {{- range .Values.image.pullSecrets }}
+  {{- range . }}
     - name: {{ . }}
   {{- end }}
   {{- end }}
@@ -38,4 +37,5 @@ spec:
         - -ec
         - |
           echo "Testing Oracle connectivity to ${ORACLE_HOST}:${ORACLE_PORT}/${ORACLE_SERVICE} ..."
-          # -L fail fast, -S silent, pipe 'exit' to quit im
+          echo "exit" | sqlplus -L -S "sys/${ORACLE_PASSWORD}@//${ORACLE_HOST}:${ORACLE_PORT}/${ORACLE_SERVICE} as sysdba"
+{{- end }}
