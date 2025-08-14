@@ -1,0 +1,21 @@
+{{- /*
+PostgreSQL is TCP (5432), so standard HTTP Ingress doesn't apply.
+For NGINX Ingress Controller, TCP exposure is configured via a special ConfigMap called "tcp-services".
+This template creates/patches a *namespaced* ConfigMap, but note: many NGINX deployments expect this
+in the controller's namespace (usually "ingress-nginx"). Adjust .Values.ingress.nginx.namespace accordingly.
+*/ -}}
+{{- $ing := .Values.ingress | default dict -}}
+{{- if ($ing.enabled | default false) -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pg.fullname" . }}-tcp
+  namespace: {{ $ing.nginx.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "pg.labels" . | nindent 4 }}
+data:
+  # Map <external-port> to "<namespace>/<service-name>:<service-port>"
+  {{- $ext := ( $ing.port | default 30432 ) -}}
+  {{- $svc := printf "%s/%s:%d" .Release.Namespace (include "pg.fullname" .) ( .Values.service.port | default 5432 ) -}}
+  "{{ $ext }}": "{{ $svc }}"
+{{- end }}

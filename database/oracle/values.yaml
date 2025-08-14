@@ -1,0 +1,69 @@
+# -- Image to run
+image:
+  repository: ghcr.io/gvenzl/oracle-xe
+  tag: "21.3.0"
+  pullPolicy: IfNotPresent
+  # If you use official Oracle registry, set this and create a secret (see step 8)
+  pullSecrets: []   # e.g. ["oracle-regcred"]
+
+# -- Basic K8s
+nameOverride: ""
+fullnameOverride: ""
+
+# -- Service
+service:
+  type: ClusterIP       # change to NodePort/LoadBalancer if you need external access
+  port: 1521
+
+# -- Storage
+persistence:
+  enabled: true
+  storageClass: ""      # e.g. "local-path" or your CSI class
+  accessModes: ["ReadWriteOnce"]
+  size: 20Gi
+  existingClaim: ""     # set if you want to use a pre-created PVC
+
+# -- Resources (tune for your cluster)
+resources:
+  requests:
+    cpu: "500m"
+    memory: "2Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+# -- Environment (XE image)
+# ORACLE_DATABASE is the PDB/service name (XE image uses this as SERVICE_NAME)
+env:
+  ORACLE_DATABASE: "XEPDB1"
+  ORACLE_CHARACTERSET: "AL32UTF8"   # optional
+  APP_USER: "admin"                      # optional app user
+  APP_USER_PASSWORD: "Ut12345678!"             # optional app user password
+
+# -- Put strong password via Secret, not plaintext
+# Create secret named <release>-oracle-credentials containing key ORACLE_PASSWORD
+existingSecretName: ""  # leave empty to let chart create from .Values.oraclePassword (dev-only)
+oraclePassword: ""      # dev-only; leave empty in prod
+
+# -- Optional: run SQL on first boot (ConfigMap with .sql files)
+initSql:
+  enabled: false
+  files: {}  # key: filename.sql, value: |
+             #   CREATE USER demo IDENTIFIED BY "demo";
+             #   GRANT CONNECT, RESOURCE TO demo;
+
+# -- Probes (XE takes time to start; be generous)
+probes:
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 20
+
+serviceAccount:
+  create: true
+  name: ""                          # optional override
+  labels: {}                        # extra labels
+  annotations: {}                   # e.g. eks.amazonaws.com/role-arn: arn:aws:iam::123:role/xyz
+  imagePullSecrets: []              # e.g. [{name: regcred}]
+  secrets: []                       # e.g. [{name: custom-secret}]
+  automountServiceAccountToken: false

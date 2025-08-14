@@ -1,0 +1,13 @@
+{{- if and .Values.initSql.enabled .Values.initSql.files }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "oracle-db.fullname" . }}-init-sql
+  labels:
+    {{- include "oracle-db.labels" . | nindent 4 }}
+data:
+{{- range $fname, $content := .Values.initSql.files }}
+  {{ $fname }}: |
+{{ $content | indent 4 }}
+{{- end }}
+{{- end }}

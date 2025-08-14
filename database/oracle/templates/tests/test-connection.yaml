@@ -1,0 +1,41 @@
+{{- $tests := .Values.tests | default dict -}}
+{{- if $tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "oracle-db.fullname" . }}-test-connection
+  labels:
+    {{- include "oracle-db.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  restartPolicy: Never
+  {{- if .Values.image.pullSecrets }}
+  imagePullSecrets:
+  {{- range .Values.image.pullSecrets }}
+    - name: {{ . }}
+  {{- end }}
+  {{- end }}
+  containers:
+    - name: sqlplus
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      env:
+        - name: ORACLE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ if .Values.existingSecretName }}{{ .Values.existingSecretName }}{{ else }}{{ include "oracle-db.fullname" . }}-credentials{{ end }}
+              key: ORACLE_PASSWORD
+        - name: ORACLE_HOST
+          value: {{ include "oracle-db.fullname" . }}
+        - name: ORACLE_PORT
+          value: {{ .Values.service.port | default 1521 | quote }}
+        - name: ORACLE_SERVICE
+          value: {{ .Values.env.ORACLE_DATABASE | default "XEPDB1" | quote }}
+      command:
+        - /bin/sh
+        - -ec
+        - |
+          echo "Testing Oracle connectivity to ${ORACLE_HOST}:${ORACLE_PORT}/${ORACLE_SERVICE} ..."
+          # -L fail fast, -S silent, pipe 'exit' to quit im

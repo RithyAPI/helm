@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "oracle-db.fullname" . }}
+  labels:
+    {{- include "oracle-db.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "oracle-db.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    type: Recreate   # database container; avoid two instances using same PVC
+  template:
+    metadata:
+      labels:
+        {{- include "oracle-db.labels" . | nindent 8 }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      containers:
+        - name: oracle
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 1521
+              name: tcp-1521
+          env:
+            - name: ORACLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if .Values.existingSecretName }}{{ .Values.existingSecretName }}{{ else }}{{ include "oracle-db.fullname" . }}-credentials{{ end }}
+                  key: ORACLE_PASSWORD
+            - name: ORACLE_DATABASE
+              value: {{ .Values.env.ORACLE_DATABASE | quote }}
+            {{- if .Values.env.ORACLE_CHARACTERSET }}
+            - name: ORACLE_CHARACTERSET
+              value: {{ .Values.env.ORACLE_CHARACTERSET | quote }}
+            {{- end }}
+            {{- if .Values.env.APP_USER }}
+            - name: APP_USER
+              value: {{ .Values.env.APP_USER | quote }}
+            - name: APP_USER_PASSWORD
+              value: {{ required "APP_USER_PASSWORD required when APP_USER is set" .Values.env.APP_USER_PASSWORD | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: oradata
+              mountPath: /opt/oracle/oradata
+            {{- if and .Values.initSql.enabled .Values.initSql.files }}
+            - name: init-sql
+              mountPath: /container-entrypoint-initdb.d
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: 1521
+            initialDelaySeconds: {{ .Values.probes.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+          livenessProbe:
+            tcpSocket:
+              port: 1521
+            initialDelaySeconds: {{ add .Values.probes.initialDelaySeconds 30 }}
+            periodSeconds: {{ .Values.probes.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.failureThreshold }}
+      volumes:
+        - name: oradata
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{ else }}{{ include "oracle-db.fullname" . }}{{ end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- if and .Values.initSql.enabled .Values.initSql.files }}
+        - name: init-sql
+          configMap:
+            name: {{ include "oracle-db.fullname" . }}-init-sql
+        {{- end }}
