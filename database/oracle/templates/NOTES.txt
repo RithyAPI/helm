@@ -1,13 +1,12 @@
-MongoDB service:
-  Name: {{ include "mongodb.fullname" . }}
-  Port: {{ .Values.service.port }}
+Thank you for installing {{ include "oracle-db.fullname" . }}!
 
-Connection (inside cluster):
-  mongodb://{{ if .Values.auth.enabled }}{{ index .Values "auth" "rootUser" }}:******@{{ end }}{{ include "mongodb.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/admin
+To connect from inside the cluster:
+  SERVICE  : {{ include "oracle-db.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  PORT     : {{ .Values.service.port | default 1521 }}
+  SERVICE NAME: {{ .Values.env.ORACLE_DATABASE | default "XEPDB1" }}
 
-If NodePort enabled:
-  http(s)://<node-ip>:{{ .Values.service.nodePort }}  (Mongo listens on TCP only)
+Example:
+  sqlplus sys/<password>@//{{ include "oracle-db.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port | default 1521 }}/{{ .Values.env.ORACLE_DATABASE | default "XEPDB1" }} as sysdba
 
-First shell (from any pod with mongosh):
-  kubectl -n {{ .Release.Namespace }} run mclient --rm -it --image=mongo:{{ .Chart.AppVersion }} -- bash
-  mongosh "mongodb://{{ if .Values.auth.enabled }}$MONGO_INITDB_ROOT_USERNAME:$MONGO_INITDB_ROOT_PASSWORD@{{ end }}{{ include "mongodb.fullname" . }}:{{ .Values.service.port }}/admin"
+If service.type = NodePort, use any node IP + nodePort shown by:
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "oracle-db.fullname" . }} -o wide

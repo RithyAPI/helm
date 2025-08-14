@@ -1,24 +1,32 @@
-{{- if .Values.autoscaling.enabled }}
+{{- if and .Values.autoscaling.enabled (not .Values.statefulset) }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "mongodb.fullname" . }}
+  name: {{ include "oracle-db.fullname" . }}
   labels:
-    {{- include "mongodb.labels" . | nindent 4 }}
+    {{- include "oracle-db.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: StatefulSet
-    name: {{ include "mongodb.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+    kind: Deployment
+    name: {{ include "oracle-db.fullname" . }}
+  minReplicas: {{ .Values.autoscaling.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.autoscaling.maxReplicas | default 2 }}
+  behavior:
+    {{- with .Values.autoscaling.behavior }}
+    {{- toYaml . | nindent 2 }}
+    {{- end }}
   metrics:
+    {{- $hasMetric := false -}}
+    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- $hasMetric = true -}}
+    {{- end }}
     {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
@@ -26,5 +34,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- $hasMetric = true -}}
+    {{- end }}
+    {{- if not $hasMetric }}
+    # default: cpu 80% if none specified
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
     {{- end }}
 {{- end }}

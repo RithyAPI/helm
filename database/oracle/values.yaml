@@ -12,8 +12,9 @@ fullnameOverride: ""
 
 # -- Service
 service:
-  type: ClusterIP       # change to NodePort/LoadBalancer if you need external access
+  type: NodePort
   port: 1521
+  nodePort: 31521
 
 # -- Storage
 persistence:
@@ -60,13 +61,20 @@ probes:
   failureThreshold: 20
 
 serviceAccount:
-  create: true
-  name: ""                          # optional override
-  labels: {}                        # extra labels
-  annotations: {}                   # e.g. eks.amazonaws.com/role-arn: arn:aws:iam::123:role/xyz
-  imagePullSecrets: []              # e.g. [{name: regcred}]
-  secrets: []                       # e.g. [{name: custom-secret}]
+  create: false
+  name: ""
+  annotations: {}
+  imagePullSecrets: []   # e.g. [{name: oracle-regcred}]
+  secrets: []
   automountServiceAccountToken: false
 
 tests:
   enabled: true   # or false
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  # targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+  # behavior: {}   # optional HPA behavior
