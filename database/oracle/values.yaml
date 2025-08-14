@@ -43,7 +43,7 @@ env:
 
 # -- Put strong password via Secret, not plaintext
 existingSecretName: ""
-oraclePassword: ""
+oraclePassword: "Ut12345678!"
 
 # -- Optional: run SQL on first boot (ConfigMap with .sql files)
 initSql:
