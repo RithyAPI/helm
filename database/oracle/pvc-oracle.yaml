@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: oracle-data-db
+  name: oracle-data-db-test
   namespace: default
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
