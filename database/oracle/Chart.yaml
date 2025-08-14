@@ -1,7 +1,0 @@
-apiVersion: v2
-name: oracle
-description: Minimal Oracle (single node) StatefulSet with PVC
-type: application
-version: 0.1.0
-appVersion: "7.0.14"   # pick a version you use
-kubeVersion: ">=1.22.0-0"

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: oracle
+  template:
+    metadata:
+      labels:
+        app: oracle
+    spec:
+      securityContext:
+        fsGroup: 54321
+      containers:
+        - name: oracle
+          image: ghcr.io/gvenzl/oracle-xe:21.3.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1521
+              name: oracle-port
+          env:
+            - name: ORACLE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oracle-credentials
+                  key: ORACLE_PASSWORD
+            - name: ORACLE_DATABASE
+              value: "XEPDB1"
+          volumeMounts:
+            - name: oradata
+              mountPath: /opt/oracle/oradata
+            - name: dshm
+              mountPath: /dev/shm
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "4Gi"
+            limits:
+              cpu: "2"
+              memory: "8Gi"
+          startupProbe:
+            tcpSocket:
+              port: 1521
+            periodSeconds: 10
+            failureThreshold: 120
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 1521
+            initialDelaySeconds: 900
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 20
+          livenessProbe:
+            tcpSocket:
+              port: 1521
+            initialDelaySeconds: 1200
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 20
+      volumes:
+        - name: oradata
+          persistentVolumeClaim:
+            claimName: oracle-data
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
