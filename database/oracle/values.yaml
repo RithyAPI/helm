@@ -67,3 +67,6 @@ serviceAccount:
   imagePullSecrets: []              # e.g. [{name: regcred}]
   secrets: []                       # e.g. [{name: custom-secret}]
   automountServiceAccountToken: false
+
+tests:
+  enabled: true   # or false
