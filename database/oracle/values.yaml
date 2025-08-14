@@ -42,8 +42,8 @@ env:
   APP_USER_PASSWORD: "abc"             # optional app user password
 
 # -- Put strong password via Secret, not plaintext
-existingSecretName: ""
-oraclePassword: "Ut12345678!"
+existingSecretName: "my-oracle-credentials"
+oraclePassword: ""  # ignored
 
 # -- Optional: run SQL on first boot (ConfigMap with .sql files)
 initSql:
