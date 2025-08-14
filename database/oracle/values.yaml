@@ -42,9 +42,8 @@ env:
   APP_USER_PASSWORD: "abc"             # optional app user password
 
 # -- Put strong password via Secret, not plaintext
-# Create secret named <release>-oracle-credentials containing key ORACLE_PASSWORD
-existingSecretName: "abc"  # leave empty to let chart create from .Values.oraclePassword (dev-only)
-oraclePassword: "abc"      # dev-only; leave empty in prod
+existingSecretName: ""
+oraclePassword: ""
 
 # -- Optional: run SQL on first boot (ConfigMap with .sql files)
 initSql:
