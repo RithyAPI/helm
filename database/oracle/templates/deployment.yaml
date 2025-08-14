@@ -10,12 +10,13 @@ spec:
     matchLabels:
       {{- include "oracle-db.selectorLabels" . | nindent 6 }}
   strategy:
-    type: Recreate   # database container; avoid two pods using same PVC
+    type: Recreate
   template:
     metadata:
       labels:
         {{- include "oracle-db.labels" . | nindent 8 }}
     spec:
+      terminationGracePeriodSeconds: 600
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
       {{- range .Values.image.pullSecrets }}
@@ -23,7 +24,6 @@ spec:
       {{- end }}
       {{- end }}
 
-      {{- /* Optional pod security context for PVC permissions (e.g., local-path) */}}
       {{- if and .Values.podSecurityContext .Values.podSecurityContext.enabled }}
       securityContext:
         {{- with .Values.podSecurityContext.fsGroup }}
@@ -64,6 +64,8 @@ spec:
           volumeMounts:
             - name: oradata
               mountPath: /opt/oracle/oradata
+            - name: dshm
+              mountPath: /dev/shm
             {{- if and .Values.initSql.enabled .Values.initSql.files }}
             - name: init-sql
               mountPath: /container-entrypoint-initdb.d
@@ -72,7 +74,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{/* ---------- Probes (robust, no dig) ---------- */}}
+          {{- /* ---- Probes (no 'dig', nil-safe) ---- */}}
           {{- $probes := .Values.probes | default dict -}}
           {{- $startup := (get $probes "startup") | default dict -}}
           {{- $startupEnabled := (default true (get $startup "enabled")) -}}
@@ -91,14 +93,14 @@ spec:
             tcpSocket:
               port: {{ $startupPort }}
             periodSeconds: {{ $startupPeriod }}
-            failureThreshold: {{ $startupFail }}
+            failureThreshold: {{ $startupFail }}   # ~20 min by default
             timeoutSeconds: {{ $startupTimeout }}
           {{- end }}
 
           readinessProbe:
             tcpSocket:
               port: {{ $startupPort }}
-            initialDelaySeconds: {{ $readInit }}
+            initialDelaySeconds: {{ $readInit }}   # default 900s
             periodSeconds: {{ $period }}
             timeoutSeconds: {{ $timeout }}
             failureThreshold: {{ $fail }}
@@ -106,7 +108,7 @@ spec:
           livenessProbe:
             tcpSocket:
               port: {{ $startupPort }}
-            initialDelaySeconds: {{ $liveInit }}
+            initialDelaySeconds: {{ $liveInit }}   # default 1200s
             periodSeconds: {{ $period }}
             timeoutSeconds: {{ $timeout }}
             failureThreshold: {{ $fail }}
@@ -119,6 +121,10 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
         {{- if and .Values.initSql.enabled .Values.initSql.files }}
         - name: init-sql
           configMap:
