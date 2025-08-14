@@ -10,7 +10,7 @@ spec:
     matchLabels:
       {{- include "oracle-db.selectorLabels" . | nindent 6 }}
   strategy:
-    type: Recreate   # database container; avoid two pods using the same PVC
+    type: Recreate   # database container; avoid two pods using same PVC
   template:
     metadata:
       labels:
@@ -72,17 +72,20 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-          {{- /* === Probes ===
-                Backward-compat: falls back to your existing .Values.probes.*
-                You can also set .Values.probes.startup.enabled/periodSeconds/failureThreshold/timeoutSeconds
-          */}}
+          {{/* ---------- Probes (robust, no dig) ---------- */}}
+          {{- $probes := .Values.probes | default dict -}}
+          {{- $startup := (get $probes "startup") | default dict -}}
+          {{- $startupEnabled := (default true (get $startup "enabled")) -}}
+          {{- $startupPort := (default 1521 (get $startup "tcpPort")) -}}
+          {{- $period := (default 15 (get $probes "periodSeconds")) -}}
+          {{- $timeout := (default 5 (get $probes "timeoutSeconds")) -}}
+          {{- $fail := (default 20 (get $probes "failureThreshold")) -}}
+          {{- $readInit := (default 900 (get $probes "readinessInitialDelay")) -}}
+          {{- $liveInit := (default 1200 (get $probes "livenessInitialDelay")) -}}
+          {{- $startupPeriod := (coalesce (get $startup "periodSeconds") $period 10) -}}
+          {{- $startupFail := (default 120 (get $startup "failureThreshold")) -}}
+          {{- $startupTimeout := (coalesce (get $startup "timeoutSeconds") $timeout 5) -}}
 
-          # Give Oracle time to initialize on first boot (unpack/create DB)
-          {{- $startupEnabled := (default true (dig "probes" "startup" "enabled" .Values)) -}}
-          {{- $startupPort := (default 1521 (dig "probes" "startup" "tcpPort" .Values)) -}}
-          {{- $startupPeriod := (default (default 10 (dig "probes" "periodSeconds" .Values)) (dig "probes" "startup" "periodSeconds" .Values)) -}}
-          {{- $startupFail := (default 120 (dig "probes" "startup" "failureThreshold" .Values)) -}}
-          {{- $startupTimeout := (default (default 5 (dig "probes" "timeoutSeconds" .Values)) (dig "probes" "startup" "timeoutSeconds" .Values)) -}}
           {{- if $startupEnabled }}
           startupProbe:
             tcpSocket:
@@ -92,11 +95,6 @@ spec:
             timeoutSeconds: {{ $startupTimeout }}
           {{- end }}
 
-          # Readiness (begin late)
-          {{- $readInit := (default 900 (dig "probes" "readinessInitialDelay" .Values)) -}}
-          {{- $period := (default 15 (dig "probes" "periodSeconds" .Values)) -}}
-          {{- $timeout := (default 5 (dig "probes" "timeoutSeconds" .Values)) -}}
-          {{- $fail := (default 20 (dig "probes" "failureThreshold" .Values)) -}}
           readinessProbe:
             tcpSocket:
               port: {{ $startupPort }}
@@ -105,8 +103,6 @@ spec:
             timeoutSeconds: {{ $timeout }}
             failureThreshold: {{ $fail }}
 
-          # Liveness (begin even later)
-          {{- $liveInit := (default 1200 (dig "probes" "livenessInitialDelay" .Values)) -}}
           livenessProbe:
             tcpSocket:
               port: {{ $startupPort }}
