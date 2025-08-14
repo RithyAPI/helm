@@ -28,7 +28,7 @@ spec:
             - name: ORACLE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: oracle-credentials
+                  name: oracle-credentials-db
                   key: ORACLE_PASSWORD
             - name: ORACLE_DATABASE
               value: "XEPDB1"
@@ -67,7 +67,7 @@ spec:
       volumes:
         - name: oradata
           persistentVolumeClaim:
-            claimName: oracle-data
+            claimName: oracle-data-db
         - name: dshm
           emptyDir:
             medium: Memory
