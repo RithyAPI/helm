@@ -30,10 +30,10 @@ spec:
             - "start"
             - "--http-enabled=true"
             - "--hostname-strict={{ .Values.hostnameStrict }}"
-            - "--hostname-strict-https={{ .Values.hostnameStrictHttps }}"
             - "--http-relative-path={{ .Values.httpRelativePath }}"
             - "--proxy={{ .Values.proxyMode }}"
             - "--metrics-enabled=true"
+
           env:
             - name: KEYCLOAK_ADMIN
               valueFrom:
