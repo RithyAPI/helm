@@ -71,8 +71,12 @@ postgresql:
     password: "ChangeMe_DB_123!"
     database: keycloak
     existingSecret: ""  # If set, must contain keys: username, password, database
-  service:
-    port: 5432
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 31080
+  
   persistence:
     enabled: true
     accessModes: ["ReadWriteOnce"]
