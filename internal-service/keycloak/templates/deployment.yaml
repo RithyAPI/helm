@@ -65,7 +65,7 @@ spec:
             - name: KC_DB_USERNAME
               value: {{ .Values.externalDatabase.user | quote }}
             - name: KC_DB_URL
-              value: "jdbc:postgresql://192.168.8.22:5432/sonarqube?sslmode=disable&currentSchema=public"
+              value: "jdbc:postgresql://postgres.sonarqube.svc.cluster.local:5432/sonarqube?sslmode=disable&currentSchema=public"
             - name: KC_DB_PASSWORD
               value: {{ .Values.externalDatabase.password | quote }}
           {{- end }}
