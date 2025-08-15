@@ -76,12 +76,12 @@ service:
   type: NodePort
   port: 8080
   nodePort: 31080
-  
-  persistence:
-    enabled: true
-    accessModes: ["ReadWriteOnce"]
-    size: 10Gi
-    storageClass: ""   # Set to your StorageClass or leave empty for default
+
+persistence:
+  enabled: true
+  accessModes: ["ReadWriteOnce"]
+  size: 10Gi
+  storageClass: ""   # Set to your StorageClass or leave empty for default
   resources:
     requests:
       cpu: 100m
