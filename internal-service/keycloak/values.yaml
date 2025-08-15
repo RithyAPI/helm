@@ -63,7 +63,7 @@ externalDatabase:
 
 # Disable bundled PostgreSQL if using external DB
 postgresql:
-  enabled: true
+  enabled: false
   image:
     repository: postgres
     tag: "15"
