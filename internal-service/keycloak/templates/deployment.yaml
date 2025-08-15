@@ -59,7 +59,7 @@ spec:
                   name: {{ include "keycloak.postgres.secretName" . }}
                   key: password
             - name: KC_DB_URL
-              value: "jdbc:postgresql://{{ include "keycloak.postgres.fullname" . }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.auth.database }}"
+              value: "jdbc:postgresql://{{ include \"keycloak.postgres.fullname\" . }}:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.auth.database }}"
           {{- else if .Values.externalDatabase.enabled }}
             - name: KC_DB
               value: postgres

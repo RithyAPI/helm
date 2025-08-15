@@ -17,7 +17,6 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "keycloak.name" . }}-postgresql
         app.kubernetes.io/instance: {{ .Release.Name }}
-        {{- include "keycloak.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: postgresql
