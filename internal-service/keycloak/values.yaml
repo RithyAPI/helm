@@ -57,9 +57,7 @@ externalDatabase:
   port: 30438
   database: keycloak
   user: sonar
-  passwordSecret:
-    name: keycloak-db-secret
-    key: password
+  password: Ut12345678!
 
 # Disable bundled PostgreSQL if using external DB
 postgresql:
