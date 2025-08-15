@@ -12,7 +12,7 @@
 
 3. Database:
 {{- if .Values.postgresql.enabled }}
-   Using bundled PostgreSQL Service: {{ include "keycloak.postgres.fullname" . }}:{{ .Values.postgresql.service.port }}
+   Using bundled PostgreSQL Service: {{ include "keycloak.postgres.fullname" . }}:{{ .Values.externalDatabase.port }}
 {{- else if .Values.externalDatabase.enabled }}
    Using external database at {{ .Values.externalDatabase.host }}:{{ .Values.externalDatabase.port }}
 {{- else }}
