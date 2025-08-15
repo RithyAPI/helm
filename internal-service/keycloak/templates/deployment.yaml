@@ -31,7 +31,6 @@ spec:
             - "--http-enabled=true"
             - "--hostname-strict={{ .Values.hostnameStrict }}"
             - "--http-relative-path={{ .Values.httpRelativePath }}"
-            - "--proxy={{ .Values.proxyMode }}"
             - "--metrics-enabled=true"
 
           env:
