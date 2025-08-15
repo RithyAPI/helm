@@ -15,8 +15,9 @@ podSecurityContext: {}
 securityContext: {}
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8080
+  nodePort: 31080
 
 ingress:
   enabled: false
@@ -39,27 +40,28 @@ affinity: {}
 # Keycloak settings
 adminUser: admin
 adminPassword: "Ut12345678!"   # For demo only; override via --set or existingSecret
-existingSecret: ""               # If set, skip creating admin secret. Must contain keys: KEYCLOAK_ADMIN, KEYCLOAK_ADMIN_PASSWORD
+existingSecret: ""             # If set, skip creating admin secret. Must contain keys: KEYCLOAK_ADMIN, KEYCLOAK_ADMIN_PASSWORD
 hostnameStrict: false
 hostnameStrictHttps: false
 httpRelativePath: "/"
-proxyMode: "edge"                # edge | reencrypt | passthrough
-extraEnv: []                     # e.g., [{name: KC_CACHE, value: "ispn"}]
-extraEnvFrom: []                 # e.g., [{secretRef: {name: my-secret}}]
+proxyMode: "edge"              # edge | reencrypt | passthrough
+extraEnv: []                   # e.g., [{name: KC_CACHE, value: "ispn"}]
+extraEnvFrom: []               # e.g., [{secretRef: {name: my-secret}}]
 extraVolumeMounts: []
 extraVolumes: []
 
-# Database: choose either an external DB or enable the bundled PostgreSQL
+# External PostgreSQL DB
 externalDatabase:
   enabled: true
   host: 192.168.8.22
   port: 30438
-  database: keycloak       # change if your DB name is different
+  database: keycloak
   user: sonar
   passwordSecret:
     name: keycloak-db-secret
     key: password
 
+# Disable bundled PostgreSQL if using external DB
 postgresql:
   enabled: true
   image:
@@ -75,22 +77,15 @@ postgresql:
     enabled: true
     accessModes: ["ReadWriteOnce"]
     size: 10Gi
-    storageClass: ""   # Set to your StorageClass or leave empty for default
-    resources:
-      requests:
-        cpu: 100m
-        memory: 256Mi
-      limits: {}
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
-
-service:
-  type: NodePort
-  port: 8080
-  nodePort: 31080
-
-
+    storageClass: ""   # Set your StorageClass or leave blank for default
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
 
 autoscaling:
   enabled: false
@@ -98,4 +93,3 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 75
   targetMemoryUtilizationPercentage: 75
-  
