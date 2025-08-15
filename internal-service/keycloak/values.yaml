@@ -55,7 +55,7 @@ externalDatabase:
   enabled: true
   host: 192.168.8.22
   port: 30438
-  database: keycloak
+  database: postgres
   user: sonar
   password: Ut12345678!
 
