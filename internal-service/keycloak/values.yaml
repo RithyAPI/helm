@@ -1,0 +1,96 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/keycloak/keycloak
+  tag: "" # If empty, uses the image's default tag (not recommended for production)
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hostname: keycloak.example.com
+  tls:
+    enabled: false
+    secretName: ""  # Provide a secret name when TLS is enabled
+  pathType: Prefix
+
+resources:
+  limits: {}
+  requests: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Keycloak settings
+adminUser: admin
+adminPassword: "Ut12345678!"   # For demo only; override via --set or existingSecret
+existingSecret: ""               # If set, skip creating admin secret. Must contain keys: KEYCLOAK_ADMIN, KEYCLOAK_ADMIN_PASSWORD
+hostnameStrict: false
+hostnameStrictHttps: false
+httpRelativePath: "/"
+proxyMode: "edge"                # edge | reencrypt | passthrough
+extraEnv: []                     # e.g., [{name: KC_CACHE, value: "ispn"}]
+extraEnvFrom: []                 # e.g., [{secretRef: {name: my-secret}}]
+extraVolumeMounts: []
+extraVolumes: []
+
+# Database: choose either an external DB or enable the bundled PostgreSQL
+externalDatabase:
+  enabled: true
+  host: 192.168.8.22
+  port: 30438
+  database: keycloak       # change if your DB name is different
+  user: sonar
+  passwordSecret:
+    name: keycloak-db-secret
+    key: password
+
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  auth:
+    username: keycloak
+    password: "ChangeMe_DB_123!"
+    database: keycloak
+    existingSecret: ""  # If set, must contain keys: username, password, database
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    storageClass: ""   # Set to your StorageClass or leave empty for default
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 75
+  

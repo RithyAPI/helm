@@ -1,0 +1,12 @@
+# Comment lines
+.git/
+.github/
+*.tgz
+*.orig
+*.bak
+*.swp
+.DS_Store
+.idea/
+.vscode/
+*.iml
+Thumbs.db
