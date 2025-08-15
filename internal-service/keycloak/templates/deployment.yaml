@@ -85,16 +85,16 @@ spec:
               protocol: TCP
           readinessProbe:
             httpGet:
-              path: /health/ready
+              path: /
               port: http
             initialDelaySeconds: 100
             periodSeconds: 10
             timeoutSeconds: 2
           livenessProbe:
             httpGet:
-              path: /health/live
+              path: /
               port: http
-            initialDelaySeconds: 60
+            initialDelaySeconds: 300
             periodSeconds: 10
             timeoutSeconds: 2
           resources:
