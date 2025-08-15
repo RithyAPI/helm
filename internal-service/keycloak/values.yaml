@@ -71,25 +71,26 @@ postgresql:
     password: "ChangeMe_DB_123!"
     database: keycloak
     existingSecret: ""  # If set, must contain keys: username, password, database
+  persistence:
+    enabled: true
+    accessModes: ["ReadWriteOnce"]
+    size: 10Gi
+    storageClass: ""   # Set to your StorageClass or leave empty for default
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
 
 service:
   type: NodePort
   port: 8080
   nodePort: 31080
 
-persistence:
-  enabled: true
-  accessModes: ["ReadWriteOnce"]
-  size: 10Gi
-  storageClass: ""   # Set to your StorageClass or leave empty for default
-  resources:
-    requests:
-      cpu: 100m
-      memory: 256Mi
-    limits: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+
 
 autoscaling:
   enabled: false
