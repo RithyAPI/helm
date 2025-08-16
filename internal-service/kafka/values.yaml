@@ -21,23 +21,25 @@ resources:
     cpu: "2"
     memory: "4Gi"
 
+service:
+  name: kafka
+  port: 9092
+  controllerPort: 9093
+
 headless:
   name: kafka-headless
   port: 9092
   controllerPort: 9093
+
+# NEW: expose each broker externally via NodePort
+externalAccess:
+  enabled: true
+  type: NodePort
+  # One port per replica, must match replicas count
+  nodePorts: [30090, 30091, 30092]
 
 podDisruptionBudget:
   enabled: true
   minAvailable: 2
 
 extraEnv: []
-
-service:
-  name: kafka
-  port: 9092
-  controllerPort: 9093
-
-externalAccess:
-  enabled: true
-  type: NodePort
-  nodePorts: [30090, 30091, 30092]  # One per replica

@@ -33,6 +33,8 @@ spec:
             - name: external
               containerPort: 9094
           env:
+            - name: KAFKA_ENABLE_KRAFT
+              value: "yes"
             - name: KAFKA_CFG_PROCESS_ROLES
               value: "broker,controller"
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
@@ -41,8 +43,6 @@ spec:
               value: "INTERNAL://:9092,CONTROLLER://:9093,EXTERNAL://:9094"
             - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
               value: "INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
-            - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
-              value: "INTERNAL"
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -56,19 +56,21 @@ spec:
                 fieldRef:
                   fieldPath: status.hostIP
             - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: 'INTERNAL://$(POD_NAME).{{ include "kafka.fullname" . }}-{{ .Values.headless.name }}.$(POD_NAMESPACE).svc.cluster.local:9092,EXTERNAL://$(NODE_IP):9094'
+              value: "INTERNAL://$(POD_NAME).{{ include "kafka.fullname" . }}-{{ .Values.headless.name }}.$(POD_NAMESPACE).svc.cluster.local:9092,EXTERNAL://$(NODE_IP):9094"
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
-              value: "{{ include \"kafka.controllerQuorumVoters\" . }}"
+              value: "{{ include "kafka.controllerQuorumVoters" . }}"
             - name: KAFKA_DATA_LOG_DIRS
               value: "/bitnami/kafka/data"
             - name: KAFKA_KRAFT_CLUSTER_ID
               value: "{{ .Values.clusterId }}"
+            - name: KAFKA_EXTRA_ARGS
+              value: ""
           command:
-            - bash
+            - /bin/bash
             - -ec
             - |
               export KAFKA_CFG_NODE_ID=${HOSTNAME##*-}
-              exec /opt/bitnami/scripts/kafka/entrypoint.sh /opt/bitnami/scripts/kafka/run.sh
+              exec /opt/bitnami/scripts/kafka/run.sh
           volumeMounts:
             - name: data
               mountPath: /bitnami/kafka
@@ -89,7 +91,7 @@ spec:
         name: data
       spec:
         accessModes:
-          {{- toYaml .Values.persistence.accessModes | nindent 8 }}
+        {{- toYaml .Values.persistence.accessModes | nindent 8 }}
         {{- if .Values.persistence.storageClass }}
         storageClassName: "{{ .Values.persistence.storageClass }}"
         {{- end }}
