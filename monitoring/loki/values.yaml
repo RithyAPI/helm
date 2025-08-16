@@ -1,5 +1,6 @@
 loki:
   enabled: true
+
   config:
     ingester:
       wal:
@@ -20,12 +21,14 @@ loki:
         shared_store: filesystem
       filesystem:
         directory: /var/loki/chunks
+
   persistence:
     enabled: true
     accessModes:
       - ReadWriteOnce
     size: 10Gi
     storageClassName: standard
+    existingClaim: loki-storage
 
   extraVolumeMounts:
     - name: loki-storage
@@ -35,3 +38,8 @@ loki:
     - name: loki-storage
       persistentVolumeClaim:
         claimName: loki-storage
+
+  service:
+    type: NodePort
+    port: 3100
+    nodePort: 31300
