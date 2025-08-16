@@ -231,7 +231,7 @@ operator:
     ## @param operator.service.ports.http Prometheus Operator service port
     ##
     ports:
-      http: 8080
+      http: 9090
     ## @param operator.service.clusterIP Specific cluster IP when service type is cluster IP. Use `None` for headless service
     ## e.g:
     ## clusterIP: None
