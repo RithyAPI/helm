@@ -5,8 +5,9 @@ tempo:
     pullPolicy: IfNotPresent
 
   service:
-    type: ClusterIP
+    type: NodePort
     port: 3200
+    nodePort: 32532
 
   config: |
     multitenancy_enabled: false
