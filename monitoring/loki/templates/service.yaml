@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: loki
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 3100
-      nodePort: {{ .Values.service.nodePort }}
   selector:
     app: loki
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 3100
+  type: {{ .Values.service.type }}

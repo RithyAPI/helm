@@ -1,49 +1,14 @@
-loki:
-  image:
-    repository: grafana/loki
-    tag: 2.9.0
-    pullPolicy: IfNotPresent
-  enabled: true
+replicaCount: 1
 
-  config:
-    ingester:
-      wal:
-        dir: /var/loki/wal
-    schema_config:
-      configs:
-        - from: 2020-10-15
-          store: boltdb-shipper
-          object_store: filesystem
-          schema: v11
-          index:
-            prefix: index_
-            period: 24h
-    storage_config:
-      boltdb_shipper:
-        active_index_directory: /var/loki/index
-        cache_location: /var/loki/boltdb-cache
-        shared_store: filesystem
-      filesystem:
-        directory: /var/loki/chunks
+image:
+  repository: grafana/loki
+  tag: "2.9.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3100
 
 persistence:
   enabled: true
-  accessModes:
-    - ReadWriteOnce
-  size: 10Gi
-  storageClassName: local-path
-  existingClaim: loki-storage
-
-extraVolumeMounts:
-  - name: loki-storage
-    mountPath: /var/loki
-
-extraVolumes:
-  - name: loki-storage
-    persistentVolumeClaim:
-      claimName: loki-storage
-
-service:
-  type: NodePort
-  port: 3100
-  nodePort: 31300
+  size: 5Gi
