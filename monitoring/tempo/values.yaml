@@ -3,6 +3,10 @@ tempo:
     repository: grafana/tempo
     tag: 2.3.1
     pullPolicy: IfNotPresent
+  query:
+    enabled: true
+    traceql:
+      enabled: true
 
   service:
     type: NodePort
