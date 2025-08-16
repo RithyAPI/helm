@@ -776,7 +776,7 @@ prometheus:
   service:
     ## @param prometheus.service.type Kubernetes service type
     ##
-    type: ClusterIP
+    type: NodePort
     ## @param prometheus.service.ports.http Prometheus service port
     ##
     ports:
@@ -788,7 +788,7 @@ prometheus:
     ## @param prometheus.service.nodePorts.http Specify the nodePort value for the LoadBalancer and NodePort service types.
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
     ## e.g:
-    ## nodePort: 30090
+    nodePort: 30090
     ##
     nodePorts:
       http: ""
