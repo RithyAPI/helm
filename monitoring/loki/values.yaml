@@ -1,14 +1,37 @@
 loki:
-  image:
-    repository: grafana/loki
-    tag: 2.9.0
-    pullPolicy: IfNotPresent
-
+  enabled: true
   config:
-    server:
-      http_listen_port: 3100
+    ingester:
+      wal:
+        dir: /var/loki/wal
+    schema_config:
+      configs:
+        - from: 2020-10-15
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /var/loki/index
+        cache_location: /var/loki/boltdb-cache
+        shared_store: filesystem
+      filesystem:
+        directory: /var/loki/chunks
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    storageClassName: standard
 
-service:
-  type: NodePort
-  port: 3100
-  nodePort: 32100
+  extraVolumeMounts:
+    - name: loki-storage
+      mountPath: /var/loki
+
+  extraVolumes:
+    - name: loki-storage
+      persistentVolumeClaim:
+        claimName: loki-storage
