@@ -1,55 +1,39 @@
-{{- /*
-Copyright Broadcom, Inc. All Rights Reserved.
-SPDX-License-Identifier: APACHE-2.0
-*/}}
-
-{{- if .Values.prometheus.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "kube-prometheus.prometheus.fullname" . }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "kube-prometheus.prometheus.labels" . | nindent 4 }}
-    {{- if .Values.prometheus.service.labels }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.prometheus.service.labels "context" $ ) | nindent 4 }}
-    {{- end }}
-  {{- if or .Values.prometheus.service.annotations .Values.commonAnnotations }}
-  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.prometheus.service.annotations .Values.commonAnnotations ) "context" . ) }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $ ) | nindent 4 }}
-  {{- end }}
+  annotations:
+    argocd.argoproj.io/tracking-id: promethues:/Service:monitoring/promethues-kube-prometheus-prometheus
+  creationTimestamp: '2025-08-16T11:34:00Z'
+  labels:
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: promethues
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: kube-prometheus
+    app.kubernetes.io/version: 0.77.1
+    helm.sh/chart: kube-prometheus-9.6.2
+  name: promethues-kube-prometheus-prometheus
+  namespace: monitoring
+  resourceVersion: '384024'
+  uid: 5d183bd2-4762-451f-b32a-12a8230182c9
 spec:
-  type: {{ .Values.prometheus.service.type }}
-  {{- if .Values.prometheus.service.sessionAffinity }}
-  sessionAffinity: {{ .Values.prometheus.service.sessionAffinity }}
-  {{- end }}
-  {{- if .Values.prometheus.service.sessionAffinityConfig }}
-  sessionAffinityConfig: {{- include "common.tplvalues.render" (dict "value" .Values.prometheus.service.sessionAffinityConfig "context" $) | nindent 4 }}
-  {{- end }}
-  {{- if and (eq .Values.prometheus.service.type "LoadBalancer") (not (empty .Values.prometheus.service.loadBalancerIP)) }}
-  loadBalancerIP: {{ .Values.prometheus.service.loadBalancerIP }}
-  {{- end }}
-  {{- if and (eq .Values.prometheus.service.type "LoadBalancer") (not (empty .Values.prometheus.service.loadBalancerClass)) }}
-  loadBalancerClass: {{ .Values.prometheus.service.loadBalancerClass }}
-  {{- end }}
-  {{- if and (eq .Values.prometheus.service.type "LoadBalancer") (not (empty .Values.prometheus.service.loadBalancerSourceRanges)) }}
-  loadBalancerSourceRanges: {{ .Values.prometheus.service.loadBalancerSourceRanges }}
-  {{- end }}
-  {{- if or (eq .Values.prometheus.service.type "LoadBalancer") (eq .Values.prometheus.service.type "NodePort") }}
-  externalTrafficPolicy: {{ .Values.prometheus.service.externalTrafficPolicy | quote }}
-  {{- end }}
-  {{- if and (eq .Values.prometheus.service.type "LoadBalancer") (eq .Values.prometheus.service.externalTrafficPolicy "Local") .Values.prometheus.service.healthCheckNodePort }}
-  healthCheckNodePort: {{ .Values.prometheus.service.healthCheckNodePort }}
-  {{- end }}
-  {{- if and .Values.prometheus.service.clusterIP (eq .Values.prometheus.service.type "ClusterIP") }}
-  clusterIP: {{ .Values.prometheus.service.clusterIP }}
-  {{- end }}
+  clusterIP: 10.233.48.175
+  clusterIPs:
+    - 10.233.48.175
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
   ports:
     - name: http
-      port: {{ .Values.prometheus.service.ports.http }}
-      targetPort: 9090
+      nodePort: 32442
+      port: 9090
       protocol: TCP
-      {{- if and .Values.prometheus.service.nodePorts.http (or (eq .Values.prometheus.service.type "NodePort") (eq .Values.prometheus.service.type "LoadBalancer")) }}
-      nodePort: {{ .Values.prometheus.service.nodePorts.http }}
-      {{- end }}
-  selector: {{- include "kube-prometheus.prometheus.matchLabels" . | nindent 4 }}
-{{- end }}
+      targetPort: 9090
+  selector:
+    app.kubernetes.io/name: prometheus
+    prometheus: promethues
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
