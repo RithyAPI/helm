@@ -4466,8 +4466,10 @@ promtail:
   ## @param promtail.image.pullPolicy Grafana Promtail image pull policy
   ## @param promtail.image.pullSecrets Grafana Promtail image pull secrets
   ##
+promtail:
   image:
-    repository: grafana/promtail:
+    registry: docker.io
+    repository: grafana/promtail
     tag: 2.9.5
     digest: ""
     ## Specify a imagePullPolicy
