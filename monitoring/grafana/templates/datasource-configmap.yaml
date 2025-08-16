@@ -1,4 +1,4 @@
-{{- if .Values.datasource.prometheus.enabled }}
+{{- if .Values.datasources.enabled | default true }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,19 +7,33 @@ metadata:
   labels:
     grafana_datasource: "1"
 data:
-  prometheus-datasource.yaml: |
+  datasources.yaml: |
     apiVersion: 1
     datasources:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: {{ .Values.datasource.prometheus.url | quote }}
+        url: {{ .Values.datasources.prometheus.url | default "http://localhost:9090" | quote }}
         isDefault: true
-        editable: true
-        {{- if .Values.datasource.prometheus.basicAuth }}
-        basicAuth: true
-        basicAuthUser: {{ .Values.datasource.prometheus.basicAuthUser | quote }}
+        basicAuth: {{ .Values.datasources.prometheus.basicAuth | default false }}
+        {{- if .Values.datasources.prometheus.basicAuth }}
+        basicAuthUser: {{ .Values.datasources.prometheus.basicAuthUser | quote }}
         secureJsonData:
-          basicAuthPassword: {{ .Values.datasource.prometheus.basicAuthPassword | quote }}
+          basicAuthPassword: {{ .Values.datasources.prometheus.basicAuthPassword | quote }}
         {{- end }}
+
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: {{ .Values.datasources.tempo.url | default "http://localhost:3100" | quote }}
+        jsonData:
+          httpMethod: GET
+          tracesToLogsV2:
+            datasourceUid: {{ .Values.datasources.tempo.tracesToLogsUid | default "loki" | quote }}
+          serviceMap:
+            datasourceUid: {{ .Values.datasources.tempo.serviceMapUid | default "prometheus" | quote }}
+          search:
+            hide: false
+          nodeGraph:
+            enabled: true
 {{- end }}
