@@ -39,6 +39,3 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-        - name: loki-storage
-          persistentVolumeClaim:
-            claimName: loki-storage
