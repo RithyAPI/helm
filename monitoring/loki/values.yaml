@@ -26,13 +26,13 @@ loki:
       filesystem:
         directory: /var/loki/chunks
 
-  persistence:
-    enabled: true
-    accessModes:
-      - ReadWriteOnce
-    size: 10Gi
-    storageClassName: standard
-    existingClaim: loki-storage
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  storageClassName: local-path  # ✅ use this, not "standard"
+  existingClaim: loki-storage
 
   extraVolumeMounts:
     - name: loki-storage
