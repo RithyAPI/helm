@@ -10,8 +10,9 @@ serviceAccount:
   name: ""
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 9090
+  nodePort: 32442
   annotations: {}
 
 resources:
