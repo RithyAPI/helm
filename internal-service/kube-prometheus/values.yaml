@@ -227,7 +227,7 @@ operator:
   service:
     ## @param operator.service.type Kubernetes service type
     ##
-    type: ClusterIP
+    type: NodePort
     ## @param operator.service.ports.http Prometheus Operator service port
     ##
     ports:
@@ -243,7 +243,7 @@ operator:
     ## nodePort: 30080
     ##
     nodePorts:
-      http: ""
+      http: 30085
     ## @param operator.service.loadBalancerIP `loadBalancerIP` if service type is `LoadBalancer`
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
     ##
