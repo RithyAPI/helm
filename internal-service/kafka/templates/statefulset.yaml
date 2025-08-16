@@ -54,7 +54,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: "INTERNAL://$(POD_NAME).{{ include \"kafka.fullname\" . }}-{{ .Values.headless.name }}.$(POD_NAMESPACE).svc.cluster.local:9092,EXTERNAL://$(NODE_IP):9094"
+              value: 'INTERNAL://$(POD_NAME).{{ include "kafka.fullname" . }}-{{ .Values.headless.name }}.$(POD_NAMESPACE).svc.cluster.local:9092,EXTERNAL://$(NODE_IP):9094'
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
               value: "{{ include "kafka.controllerQuorumVoters" . }}"
             - name: KAFKA_DATA_LOG_DIRS
@@ -88,8 +88,12 @@ spec:
     - metadata:
         name: data
       spec:
-        accessModes: {{ .Values.persistence.accessModes | toYaml | nindent 8 }}
-        storageClassName: {{- if .Values.persistence.storageClass }} "{{ .Values.persistence.storageClass }}" {{- else }} null {{- end }}
+        accessModes:
+          {{- toYaml .Values.persistence.accessModes | nindent 8 }}
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: "{{ .Values.persistence.storageClass }}"
+        {{- end }}
         resources:
           requests:
             storage: {{ .Values.persistence.size }}
+
