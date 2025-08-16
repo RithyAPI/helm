@@ -1,17 +1,12 @@
-{{- if and .Values.loki.persistence.enabled (not .Values.loki.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.loki.persistence.claimName }}
-  annotations:
-    helm.sh/resource-policy: keep
+  name: loki-storage
+  namespace: monitoring
 spec:
   accessModes:
-{{ toYaml .Values.loki.persistence.accessModes | indent 4 }}
+    - ReadWriteOnce
   resources:
     requests:
-      storage: {{ .Values.loki.persistence.size }}
-  {{- if .Values.loki.persistence.storageClassName }}
-  storageClassName: {{ .Values.loki.persistence.storageClassName | quote }}
-  {{- end }}
-{{- end }}
+      storage: 10Gi
+  storageClassName: standard
