@@ -1,0 +1,10 @@
+apiVersion: v2
+name: simple-prometheus
+description: A minimal Helm chart to run Prometheus (server) in Kubernetes
+type: application
+version: 0.1.0
+appVersion: "v2.54.1"
+home: https://prometheus.io/
+maintainers:
+  - name: sample
+    email: example@example.com

@@ -1,0 +1,6 @@
+1. Get the Prometheus URL:
+   - If using port-forward:
+       kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "prom.fullname" . }} 9090:{{ .Values.service.port }}
+       http://localhost:9090
+
+   - If using Ingress, browse to the configured host.
