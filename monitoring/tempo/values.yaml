@@ -2,6 +2,7 @@ tempo:
   image:
     repository: grafana/tempo
     tag: 2.3.1
+    pullPolicy: IfNotPresent
 
   service:
     type: ClusterIP
@@ -15,17 +16,17 @@ tempo:
 
     distributor:
       receivers:
+        otlp:
+          protocols:
+            grpc:
+            http:
+        zipkin:
         jaeger:
           protocols:
             grpc:
             thrift_binary:
             thrift_compact:
             thrift_http:
-        otlp:
-          protocols:
-            grpc:
-            http:
-        zipkin:
 
     ingester:
       trace_idle_period: 10s

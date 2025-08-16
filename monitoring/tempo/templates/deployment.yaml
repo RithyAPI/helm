@@ -18,11 +18,19 @@ spec:
         - name: tempo
           image: "{{ .Values.tempo.image.repository }}:{{ .Values.tempo.image.tag }}"
           imagePullPolicy: {{ .Values.tempo.image.pullPolicy }}
+          args:
+            - -config.file=/etc/tempo/tempo.yaml
           ports:
             - containerPort: 3200
           volumeMounts:
+            - name: tempo-config
+              mountPath: /etc/tempo
+              readOnly: true
             - name: tempo-storage
               mountPath: /tmp/tempo
       volumes:
+        - name: tempo-config
+          configMap:
+            name: tempo-config
         - name: tempo-storage
           emptyDir: {}
