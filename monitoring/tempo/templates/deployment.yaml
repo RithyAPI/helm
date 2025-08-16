@@ -20,3 +20,9 @@ spec:
           imagePullPolicy: {{ .Values.tempo.image.pullPolicy }}
           ports:
             - containerPort: 3200
+          volumeMounts:
+            - name: tempo-storage
+              mountPath: /tmp/tempo
+      volumes:
+        - name: tempo-storage
+          emptyDir: {}
