@@ -4467,7 +4467,6 @@ promtail:
   ## @param promtail.image.pullSecrets Grafana Promtail image pull secrets
   ##
   image:
-    registry: 
     repository: grafana/promtail:
     tag: 2.9.5
     digest: ""
