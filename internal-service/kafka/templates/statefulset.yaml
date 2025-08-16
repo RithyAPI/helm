@@ -64,7 +64,13 @@ spec:
             - name: KAFKA_EXTRA_ARGS
               value: ""
             - name: KAFKA_CFG_NODE_ID
-              value: "{{ .Values.nodeIdPrefix | default "" }}{{`{{`}} .StatefulSet.ordinals {{`}}`}}" 
+              value: "0"
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              export KAFKA_CFG_NODE_ID=${HOSTNAME##*-}
+              exec /opt/bitnami/scripts/kafka/run.sh
           volumeMounts:
             - name: data
               mountPath: /bitnami/kafka
