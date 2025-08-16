@@ -54,6 +54,7 @@ spec:
     - name: tcp-external
       port: {{ .Values.service.ports.external }}
       protocol: TCP
+      {{- if eq .Values.service.type "NodePort" }}
       targetPort: external
       {{- if (not (empty .Values.service.nodePorts.external)) }}
       nodePort: {{ .Values.service.nodePorts.external }}
