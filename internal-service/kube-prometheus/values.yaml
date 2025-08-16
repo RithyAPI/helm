@@ -788,7 +788,8 @@ prometheus:
     ## @param prometheus.service.nodePorts.http Specify the nodePort value for the LoadBalancer and NodePort service types.
     ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
     ## e.g:
-    nodePort: 30090
+    nodePort: 
+      http: 30090
     ##
     nodePorts:
       http: ""
