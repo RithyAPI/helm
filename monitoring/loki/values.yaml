@@ -39,7 +39,7 @@ loki:
       persistentVolumeClaim:
         claimName: loki-storage
 
-  service:
-    type: NodePort
-    port: 3100
-    nodePort: 31300
+service:
+  type: NodePort
+  port: 3100
+  nodePort: 31300
