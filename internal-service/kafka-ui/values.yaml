@@ -25,7 +25,7 @@ yamlApplicationConfig:
   kafka:
     clusters:
       - name: local
-        bootstrapServers: kafka-0.kafka-kafka-headless.kafka.svc.cluster.local:9092
+        bootstrapServers: kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9092
   # spring:
   #   security:
   #     oauth2:
