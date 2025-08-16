@@ -1,0 +1,10 @@
+1. Access Grafana:
+   - Port-forward:
+       kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "grafana.fullname" . }} 3000:{{ .Values.service.port }}
+       http://localhost:3000
+
+2. Login:
+   - Username/Password from Secret (GF_SECURITY_ADMIN_USER / GF_SECURITY_ADMIN_PASSWORD).
+
+3. Prometheus datasource:
+   - Pre-provisioned from values.datasource.prometheus.url

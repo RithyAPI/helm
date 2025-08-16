@@ -1,0 +1,42 @@
+{{- if .Values.dashboards.example.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grafana.fullname" . }}-dashboards-provisioning
+  namespace: {{ .Release.Namespace }}
+data:
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grafana.fullname" . }}-dashboards
+  namespace: {{ .Release.Namespace }}
+data:
+  example.json: |
+    {{
+      "id": null,
+      "title": "Example: Prometheus Targets",
+      "schemaVersion": 39,
+      "version": 1,
+      "panels": [
+        {{
+          "type": "stat",
+          "title": "Up Targets",
+          "datasource": {{"type":"prometheus","uid":"PBFA97CFB590B2093"}},
+          "targets":[{{"expr":"sum(up)","refId":"A"}}]
+        }}
+      ]
+    }}
+{{- end }}

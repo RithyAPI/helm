@@ -1,0 +1,61 @@
+image:
+  repository: grafana/grafana
+  tag: "11.1.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 3000
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: grafana.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+persistence:
+  enabled: true
+  accessModes: ["ReadWriteOnce"]
+  size: 8Gi
+  storageClass: ""
+
+adminUser: "admin"
+adminPassword: "admin123"  # change me (or set existingSecret)
+
+existingSecret: ""   # if set, must contain keys: GF_SECURITY_ADMIN_USER, GF_SECURITY_ADMIN_PASSWORD
+
+datasource:
+  prometheus:
+    enabled: true
+    url: "http://192.168.8.22:32442"
+    basicAuth: false
+    basicAuthUser: ""
+    basicAuthPassword: ""
+
+dashboards:
+  example:
+    enabled: true

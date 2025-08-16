@@ -1,0 +1,25 @@
+{{- if .Values.datasource.prometheus.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "grafana.fullname" . }}-datasource
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_datasource: "1"
+data:
+  prometheus-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: {{ .Values.datasource.prometheus.url | quote }}
+        isDefault: true
+        editable: true
+        {{- if .Values.datasource.prometheus.basicAuth }}
+        basicAuth: true
+        basicAuthUser: {{ .Values.datasource.prometheus.basicAuthUser | quote }}
+        secureJsonData:
+          basicAuthPassword: {{ .Values.datasource.prometheus.basicAuthPassword | quote }}
+        {{- end }}
+{{- end }}

@@ -1,0 +1,8 @@
+.git/
+.hg/
+.svn/
+*.swp
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

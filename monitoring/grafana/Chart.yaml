@@ -1,0 +1,10 @@
+apiVersion: v2
+name: simple-grafana
+description: A minimal Grafana Helm chart with Prometheus datasource provisioning
+type: application
+version: 0.1.0
+appVersion: "11.1.0"
+home: https://grafana.com/
+maintainers:
+  - name: sample
+    email: example@example.com
