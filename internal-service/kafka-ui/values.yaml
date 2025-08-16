@@ -22,11 +22,10 @@ serviceAccount:
 
 existingConfigMap: ""
 yamlApplicationConfig:
-  {}
-  # kafka:
-  #   clusters:
-  #     - name: yaml
-  #       bootstrapServers: kafka-service:9092
+  kafka:
+    clusters:
+      - name: local
+        bootstrapServers: kafka-0.kafka-kafka-headless.kafka.svc.cluster.local:9092
   # spring:
   #   security:
   #     oauth2:
