@@ -1,0 +1,25 @@
+{{- if .Values.externalAccess.enabled }}
+{{- $fullname := include "kafka.fullname" . -}}
+{{- $replicas := (int .Values.replicas) -}}
+apiVersion: v1
+kind: List
+items:
+{{- range $i, $port := .Values.externalAccess.nodePorts }}
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: {{ $fullname }}-external-{{ $i }}
+      labels:
+        app.kubernetes.io/name: {{ include "kafka.name" $ }}
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+    spec:
+      type: NodePort
+      ports:
+        - name: external
+          port: 9094
+          targetPort: 9094
+          nodePort: {{ $port }}
+      selector:
+        statefulset.kubernetes.io/pod-name: {{ $fullname }}-{{ $i }}
+{{- end }}
+{{- end }}

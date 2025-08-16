@@ -1,0 +1,43 @@
+# -------- Basic settings --------
+replicas: 3
+image:
+  repository: bitnami/kafka
+  tag: 3.7.0
+  pullPolicy: IfNotPresent
+
+clusterId: "REPLACE_WITH_YOUR_CLUSTER_ID"
+
+persistence:
+  enabled: true
+  size: 20Gi
+  storageClass: "" 
+  accessModes: ["ReadWriteOnce"]
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+headless:
+  name: kafka-headless
+  port: 9092
+  controllerPort: 9093
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+extraEnv: []
+
+service:
+  name: kafka
+  port: 9092
+  controllerPort: 9093
+
+externalAccess:
+  enabled: true
+  type: NodePort
+  nodePorts: [30090, 30091, 30092]  # One per replica
