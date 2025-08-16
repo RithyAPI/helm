@@ -30,8 +30,6 @@ spec:
             - name: config
               mountPath: /etc/loki
               readOnly: true
-            - name: loki-storage
-              mountPath: /var/loki
       volumes:
         - name: config
           configMap:
