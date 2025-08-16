@@ -25,18 +25,20 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   example.json: |
-    {{
+    {
       "id": null,
       "title": "Example: Prometheus Targets",
       "schemaVersion": 39,
       "version": 1,
       "panels": [
-        {{
+        {
           "type": "stat",
           "title": "Up Targets",
-          "datasource": {{"type":"prometheus","uid":"PBFA97CFB590B2093"}},
-          "targets":[{{"expr":"sum(up)","refId":"A"}}]
-        }}
+          "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+          "targets": [
+            { "expr": "sum(up)", "refId": "A" }
+          ]
+        }
       ]
-    }}
+    }
 {{- end }}
