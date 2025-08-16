@@ -8,10 +8,17 @@ tempo:
     traceql:
       enabled: true
 
-  service:
-    type: NodePort
-    port: 3200
-    nodePort: 32532
+service:
+  type: NodePort
+  ports:
+    - name: tempo-ui
+      port: 3200
+      targetPort: 3200
+      nodePort: 32532
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      nodePort: 32418   # You can choose another free NodePort (30000-32767)
 
   config: |
     multitenancy_enabled: false
