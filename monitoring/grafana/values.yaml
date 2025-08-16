@@ -49,13 +49,31 @@ adminPassword: "admin123"  # change me (or set existingSecret)
 
 existingSecret: ""   # if set, must contain keys: GF_SECURITY_ADMIN_USER, GF_SECURITY_ADMIN_PASSWORD
 
-datasource:
-  prometheus:
-    enabled: true
-    url: "http://192.168.8.22:32442"
-    basicAuth: false
-    basicAuthUser: ""
-    basicAuthPassword: ""
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://192.168.8.22:32442
+        isDefault: true
+        basicAuth: false
+
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://192.168.8.22:32532
+        jsonData:
+          httpMethod: GET
+          tracesToLogsV2:
+            datasourceUid: 'loki'
+          serviceMap:
+            datasourceUid: 'prometheus'
+          search:
+            hide: false
+          nodeGraph:
+            enabled: true
 
 dashboards:
   example:
