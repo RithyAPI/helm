@@ -1,9 +1,10 @@
-# loki-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: loki-config
-  namespace: monitoring
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: loki
 data:
   config.yaml: |
     auth_enabled: false
