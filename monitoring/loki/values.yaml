@@ -47,3 +47,14 @@ service:
   type: NodePort
   port: 3100
   nodePort: 31300
+
+
+persistence:
+  enabled: true
+  existingClaim: ""          # if set, chart won't create a PVC
+  claimName: loki-data-pvc  # used when existingClaim == ""
+  size: 50Gi
+  accessModes: [ReadWriteOnce]
+  storageClass: local-path
+  mountPath: /var/loki
+  fixPermissions: true       # runs an initContainer chown
