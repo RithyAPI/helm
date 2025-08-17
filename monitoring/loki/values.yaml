@@ -65,7 +65,6 @@ lokiConfig:
     wal:
       enabled: true
       dir: /data/loki/wal
-    replication_factor: 1           # ✅ correct location
 
   common:
     ring:
@@ -88,6 +87,7 @@ lokiConfig:
     reject_old_samples_max_age: 168h
     retention_period: 168h
     allow_deletes: false
+    replication_factor: 1
 
   schema_config:
     configs:
