@@ -1,0 +1,13 @@
+# Patterns to ignore when packaging Helm charts.
+# This supports shell glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+.DS_Store
+*.swp
+*.bak
+*.tmp
+*.orig
+.git/
+.github/
+*.tgz
+*.zip
+README.md

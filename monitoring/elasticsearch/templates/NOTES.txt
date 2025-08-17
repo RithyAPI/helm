@@ -1,0 +1,12 @@
+1. This chart deploys a single-node Elasticsearch for demos.
+   Security is disabled for simplicity. DO NOT use in production.
+
+2. Access:
+   - Inside cluster:  http://{{ include "elasticsearch-simple.fullname" . }}:{{ .Values.service.port }}
+   - Port-forward:    kubectl port-forward svc/{{ include "elasticsearch-simple.fullname" . }} 9200:{{ .Values.service.port }}
+     Then visit:      http://localhost:9200
+
+3. Common prerequisite on nodes (to avoid boot errors):
+   - Ensure vm.max_map_count >= 262144 on each node, e.g.
+     sudo sysctl -w vm.max_map_count=262144
+     (Make it persistent via /etc/sysctl.d config on your nodes.)
