@@ -1,0 +1,6 @@
+apiVersion: v2
+name: loki
+description: A minimal Helm chart to deploy Grafana Loki (single process) with boltdb-shipper.
+type: application
+version: 0.1.0
+appVersion: "2.9.8"

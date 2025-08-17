@@ -1,0 +1,12 @@
+1. Get the Loki service URL by running these commands:
+  export POD_NAMESPACE={{ .Release.Namespace }}
+  kubectl get svc --namespace $POD_NAMESPACE {{ include "loki.fullname" . }}
+
+2. Port-forward to access locally:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "loki.fullname" . }} 3100:3100
+
+3. Example: verify readiness
+  curl http://127.0.0.1:3100/ready
+
+4. Point Promtail/Prometheus to Loki (write URL):
+  http://{{ include "loki.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}
