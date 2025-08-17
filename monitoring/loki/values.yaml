@@ -70,7 +70,7 @@ lokiConfig:
   common:
     ring:
       kvstore:
-        store: memberlist
+        store: inmemory
 
   memberlist:
     join_members: []
