@@ -128,3 +128,12 @@ lokiConfig:
 
   analytics:
     reporting_enabled: false
+
+loki:
+  commonConfig:
+    replication_factor: 1
+
+  auth_enabled: false
+
+  # Set this explicitly to run all components together
+  target: all
