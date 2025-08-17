@@ -22,8 +22,9 @@ securityContext:
   readOnlyRootFilesystem: false
 
 service:
-  type: ClusterIP
-  port: 3100
+  type: NodePort
+  port: 30088
+  nodePort: 
   annotations: {}
 
 ingress:
