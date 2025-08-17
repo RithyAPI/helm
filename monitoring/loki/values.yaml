@@ -23,8 +23,8 @@ securityContext:
 
 service:
   type: NodePort
-  port: 3100             # <-- service port (not 30088)
-  nodePort: 30088        # <-- actual NodePort exposed externally
+  port: 3100
+  nodePort: 30088
   annotations: {}
 
 ingress:
@@ -62,23 +62,35 @@ lokiConfig:
   target: all
   auth_enabled: false
 
-  ingester:
-    wal:
-      enabled: true
-      dir: /data/loki/wal
+  server:
+    http_listen_port: 3100
+    http_listen_address: 0.0.0.0
+    log_level: info
 
   common:
     ring:
       kvstore:
         store: inmemory
 
+  distributor:
+    ring:
+      kvstore:
+        store: inmemory
+
+  ingester:
+    wal:
+      enabled: false # set true only if needed
+      dir: /data/loki/wal
+    lifecycler:
+      ring:
+        kvstore:
+          store: inmemory
+        replication_factor: 1
+      join_after: 0s
+    max_transfer_retries: 0
+
   memberlist:
     join_members: []
-
-  server:
-    http_listen_port: 3100
-    http_listen_address: 0.0.0.0
-    log_level: info
 
   limits_config:
     ingestion_rate_mb: 8
@@ -140,6 +152,4 @@ loki:
     replication_factor: 1
 
   auth_enabled: false
-
-  # Set this explicitly to run all components together
   target: all
