@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/kibana/kibana
+  tag: "8.13.4"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5601
+  name: http
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+elasticsearchURL: "http://es-elasticsearch-simple:9200"
+
+podAnnotations: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: kibana.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
