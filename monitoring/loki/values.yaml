@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: grafana/loki
@@ -59,6 +59,7 @@ tolerations: []
 affinity: {}
 
 lokiConfig:
+  target: all
   auth_enabled: false
 
   ingester:
@@ -80,6 +81,7 @@ lokiConfig:
     log_level: info
 
   limits_config:
+    replication_factor: 1
     ingestion_rate_mb: 8
     ingestion_burst_size_mb: 16
     max_streams_per_user: 100000
