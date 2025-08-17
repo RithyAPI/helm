@@ -12,9 +12,12 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "elasticsearch-simple.selectorLabels" . | nindent 8 }}
+      {{- include "elasticsearch-simple.selectorLabels" . | nindent 8 }}
       annotations:
         {{- toYaml .Values.podAnnotations | nindent 8 }}
+        {{- if .Values.rolloutTrigger }}
+        rolloutTrigger: "{{ .Values.rolloutTrigger }}"
+        {{- end }}
     spec:
       securityContext:
         fsGroup: 1000

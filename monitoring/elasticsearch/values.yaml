@@ -49,3 +49,6 @@ ingress:
         - path: /
           pathType: Prefix
   tls: []
+# Add this near the top (or anywhere)
+
+rolloutTrigger: ""   # set to any changing string (e.g., a timestamp) to trigger a rollout
