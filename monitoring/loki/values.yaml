@@ -58,7 +58,6 @@ tolerations: []
 affinity: {}
 
 lokiConfig:
-  # Disable multi-tenant auth for labs (you had this at the root; it must be here)
   auth_enabled: false
 
   ingester:
@@ -66,7 +65,6 @@ lokiConfig:
       enabled: true
       dir: /data/loki/wal
 
-  # Use memberlist ring (no Consul/Etcd needed)
   common:
     ring:
       kvstore:
@@ -87,7 +85,8 @@ lokiConfig:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     retention_period: 168h
-    allow_deletes: false        # ← prevents compactor “delete store timeout”
+    allow_deletes: false
+    replication_factor: 1            # ✅ required for single replica Loki
 
   schema_config:
     configs:
@@ -110,6 +109,7 @@ lokiConfig:
   compactor:
     working_directory: /data/loki/compactor
     shared_store: filesystem
+    delete_request_store: filesystem   # ✅ required to avoid timeout on single node
     compaction_interval: 5m
     retention_enabled: true
 
