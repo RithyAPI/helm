@@ -52,24 +52,32 @@ persistence:
   accessModes:
     - ReadWriteOnce
 
-# Extra environment variables for the container
-extraEnv: []
+extraEnv: []  # Extra environment variables
 
-# Node scheduling
 nodeSelector: {}
 tolerations: []
 affinity: {}
 
-# Loki configuration (single process + boltdb-shipper + filesystem object store)
 lokiConfig:
   ingester:
-      wal:
-        enabled: true
-        dir: /data/loki/wal
+    wal:
+      enabled: true
+      dir: /data/loki/wal
+
+  # Use memberlist ring (no Consul/Etcd needed)
+  common:
+    ring:
+      kvstore:
+        store: memberlist
+
+  memberlist:
+    join_members: []
+
   server:
     http_listen_port: 3100
     http_listen_address: 0.0.0.0
     log_level: info
+
   limits_config:
     ingestion_rate_mb: 8
     ingestion_burst_size_mb: 16
@@ -77,6 +85,7 @@ lokiConfig:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     retention_period: 168h
+
   schema_config:
     configs:
       - from: 2020-10-24
@@ -86,6 +95,7 @@ lokiConfig:
         index:
           prefix: index_
           period: 24h
+
   storage_config:
     boltdb_shipper:
       active_index_directory: /data/loki/index
@@ -93,11 +103,13 @@ lokiConfig:
       shared_store: filesystem
     filesystem:
       directory: /data/loki/chunks
+
   compactor:
     working_directory: /data/loki/compactor
     shared_store: filesystem
     compaction_interval: 5m
     retention_enabled: true
+
   ruler:
     storage:
       type: local
@@ -107,5 +119,8 @@ lokiConfig:
     alertmanager_url: ""
     ring:
       kvstore:
-        store: inmemory
+        store: memberlist
     enable_api: true
+
+  analytics:
+    reporting_enabled: false
