@@ -48,17 +48,19 @@ resources:
 persistence:
   enabled: true
   size: 10Gi
-  storageClass: ""  # set to your StorageClass name or leave empty
+  storageClass: ""   # set to your StorageClass name or leave empty
   accessModes:
     - ReadWriteOnce
 
-extraEnv: []  # Extra environment variables
-
+extraEnv: []
 nodeSelector: {}
 tolerations: []
 affinity: {}
 
 lokiConfig:
+  # Disable multi-tenant auth for labs (you had this at the root; it must be here)
+  auth_enabled: false
+
   ingester:
     wal:
       enabled: true
@@ -85,6 +87,7 @@ lokiConfig:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
     retention_period: 168h
+    allow_deletes: false        # ← prevents compactor “delete store timeout”
 
   schema_config:
     configs:
@@ -124,6 +127,3 @@ lokiConfig:
 
   analytics:
     reporting_enabled: false
-
-# optional but recommended for single-tenant labs
-auth_enabled: false
