@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: grafana/loki
@@ -109,8 +109,8 @@ lokiConfig:
   compactor:
     working_directory: /data/loki/compactor
     shared_store: filesystem
-    delete_request_store: filesystem
     compaction_interval: 5m
+    delete_request_store: null
     retention_enabled: true
 
   ruler:
