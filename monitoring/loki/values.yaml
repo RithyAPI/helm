@@ -62,6 +62,10 @@ affinity: {}
 
 # Loki configuration (single process + boltdb-shipper + filesystem object store)
 lokiConfig:
+  ingester:
+      wal:
+        enabled: true
+        dir: /data/loki/wal
   server:
     http_listen_port: 3100
     http_listen_address: 0.0.0.0
