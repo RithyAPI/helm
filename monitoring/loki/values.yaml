@@ -19,7 +19,7 @@ podSecurityContext:
 
 securityContext:
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
 
 service:
   type: ClusterIP
@@ -124,3 +124,6 @@ lokiConfig:
 
   analytics:
     reporting_enabled: false
+
+# optional but recommended for single-tenant labs
+auth_enabled: false
