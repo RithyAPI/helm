@@ -11,5 +11,6 @@ spec:
   ports:
     - name: {{ .Values.service.name }}
       port: {{ .Values.service.port }}
+      port: {{ .Values.service.nodePort }}
       targetPort: 9200
       protocol: TCP
