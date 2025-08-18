@@ -4,26 +4,13 @@ metadata:
   name: {{ include "kibana-simple.fullname" . }}
   labels:
     {{- include "kibana-simple.labels" . | nindent 4 }}
-  {{- with .Values.service.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
 spec:
   type: {{ .Values.service.type }}
-  {{- if and (eq .Values.service.type "LoadBalancer") .Values.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
-  {{- end }}
-  {{- with .Values.service.loadBalancerSourceRanges }}
-  loadBalancerSourceRanges:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   selector:
     {{- include "kibana-simple.selectorLabels" . | nindent 4 }}
   ports:
-    - name: {{ .Values.service.portName | default "http" }}
-      port: {{ .Values.service.port | default 5601 }}
-      targetPort: {{ .Values.service.targetPort | default 5601 }}
-      protocol: TCP
-      {{- if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) .Values.service.nodePort }}
+    - name: {{ .Values.service.name }}
+      port: {{ .Values.service.port }}
       nodePort: {{ .Values.service.nodePort }}
-      {{- end }}
+      targetPort: 5601
+      protocol: TCP
