@@ -1,6 +1,0 @@
-apiVersion: v2
-name: kibana-simple
-description: A minimal Kibana Helm chart for demos and labs
-type: application
-version: 0.1.0
-appVersion: "8.13.4"

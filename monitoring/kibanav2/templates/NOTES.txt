@@ -1,9 +1,0 @@
-1. This chart deploys Kibana connected to Elasticsearch.
-   Security is disabled in ES, so Kibana connects without credentials.
-
-2. Access:
-   - Inside cluster:  http://{{ include "kibana-simple.fullname" . }}:{{ .Values.service.port }}
-   - Port-forward:    kubectl port-forward svc/{{ include "kibana-simple.fullname" . }} 5601:{{ .Values.service.port }}
-     Then visit:      http://localhost:5601
-
-3. If you changed Elasticsearch release name/namespace, update .Values.elasticsearchURL accordingly.

@@ -6,8 +6,9 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
+  type: nodePort
   port: 5601
+  nodePort: 30544
   name: http
 
 resources:
@@ -18,7 +19,35 @@ resources:
     cpu: "500m"
     memory: "1Gi"
 
+# Default ES URL (matches elasticsearch-simple chart)
 elasticsearchURL: "http://es-elasticsearch-simple:9200"
+
+# Extra environment variables passed to Kibana
+extraEnv:
+  # Disable Kibana security to match unsecured Elasticsearch demo
+  - name: XPACK_SECURITY_ENABLED
+    value: "false"
+  # Bind to all interfaces
+  - name: SERVER_HOST
+    value: "0.0.0.0"
+  # Optional: remove Kibana warning about server.publicBaseUrl by setting it here
+  # - name: SERVER_PUBLICBASEURL
+  #   value: "http://kibana.example.com"
+
+# Probes
+readinessProbe:
+  path: /api/status
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 40
+
+livenessProbe:
+  path: /api/status
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 10
 
 podAnnotations: {}
 
