@@ -13,8 +13,8 @@ spec:
     metadata:
       labels:
         {{- include "kibana-simple.selectorLabels" . | nindent 8 }}
-      annotations:
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      annotations:	
+        kubectl.kubernetes.io/restartedAt: '2025-08-18T14:57:07Z'
     spec:
       containers:
         - name: kibana
