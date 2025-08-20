@@ -13,11 +13,8 @@ spec:
     metadata:
       labels:
       {{- include "elasticsearch-simple.selectorLabels" . | nindent 8 }}
-      annotations:
-        {{- toYaml .Values.podAnnotations | nindent 8 }}
-        {{- if .Values.rolloutTrigger }}
-        rolloutTrigger: "{{ .Values.rolloutTrigger }}"
-        {{- end }}
+      annotations:	
+        kubectl.kubernetes.io/restartedAt: '2025-08-17T14:34:02Z'
     spec:
       securityContext:
         fsGroup: 1000
