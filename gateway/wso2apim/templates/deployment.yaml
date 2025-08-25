@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2am
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: wso2am
+  template:
+    metadata:
+      labels:
+        app: wso2am
+    spec:
+      containers:
+        - name: wso2am
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 9443
+            - containerPort: 9763
+          volumeMounts:
+            - name: zip-volume
+              mountPath: /home/wso2am
+      initContainers:
+        - name: download-and-unzip
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              wget -q https://github.com/wso2/product-apim/releases/download/v4.4.0/wso2am-4.4.0.zip -O /tmp/wso2am.zip && \
+              unzip -q /tmp/wso2am.zip -d /home/wso2am
+          volumeMounts:
+            - name: zip-volume
+              mountPath: /home/wso2am
+      volumes:
+        - name: zip-volume
+          emptyDir: {}

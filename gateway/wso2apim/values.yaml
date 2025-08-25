@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: wso2/wso2am
+  tag: "4.4.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 9443
+  nodePort: 30443
+
+resources: {}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: wso2am
+description: A Helm chart to deploy WSO2 API Manager 4.4.0
+type: application
+version: 0.1.0
+appVersion: "4.4.0"
