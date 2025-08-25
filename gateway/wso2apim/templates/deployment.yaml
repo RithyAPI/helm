@@ -24,13 +24,14 @@ spec:
               mountPath: /home/wso2am
       initContainers:
         - name: download-and-unzip
-          image: busybox:latest
+          image: alpine:latest
           command:
             - sh
             - -c
             - |
-              wget -q https://github.com/wso2/product-apim/releases/download/v4.4.0/wso2am-4.4.0.zip -O /tmp/wso2am.zip && \
-              unzip -q /tmp/wso2am.zip -d /home/wso2am
+              apk add --no-cache wget unzip && \
+              wget https://github.com/wso2/product-apim/releases/download/v4.4.0/wso2am-4.4.0.zip -O /tmp/wso2am.zip && \
+              unzip /tmp/wso2am.zip -d /home/wso2am
           volumeMounts:
             - name: zip-volume
               mountPath: /home/wso2am
