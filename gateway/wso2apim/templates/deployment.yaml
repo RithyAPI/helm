@@ -17,6 +17,22 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 9443  # Admin Portal
-            - containerPort: 9444  # Publisher
-            - containerPort: 9445  # Developer Portal
+            - containerPort: 9443
+            - containerPort: 9444
+            - containerPort: 9445
+          readinessProbe:
+            httpGet:
+              path: /services/Version
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 180
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /services/Version
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 180
+            periodSeconds: 30
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

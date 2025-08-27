@@ -10,4 +10,10 @@ service:
   port: 9443
   nodePort: 30443
 
-resources: {}
+resources:
+  requests:
+    memory: "2Gi"
+    cpu: "500m"
+  limits:
+    memory: "4Gi"
+    cpu: "1"
