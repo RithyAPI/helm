@@ -17,24 +17,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 9443
-            - containerPort: 9763
-          volumeMounts:
-            - name: zip-volume
-              mountPath: /home/wso2am
-      initContainers:
-        - name: download-and-unzip
-          image: alpine:latest
-          command:
-            - sh
-            - -c
-            - |
-              apk add --no-cache wget unzip && \
-              wget https://github.com/wso2/product-apim/releases/download/v4.4.0/wso2am-4.4.0.zip -O /tmp/wso2am.zip && \
-              unzip /tmp/wso2am.zip -d /home/wso2am
-          volumeMounts:
-            - name: zip-volume
-              mountPath: /home/wso2am
-      volumes:
-        - name: zip-volume
-          emptyDir: {}
+            - containerPort: 9443  # Admin Portal
+            - containerPort: 9444  # Publisher
+            - containerPort: 9445  # Developer Portal
