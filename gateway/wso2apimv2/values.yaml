@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  repository: wso2/wso2am
+  tag: "4.4.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  nodePorts:
+    ui: 30443
+    gatewayHttps: 30243
+    gatewayHttp: 30280
+
+resources: {}

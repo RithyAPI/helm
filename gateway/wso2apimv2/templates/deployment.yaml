@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2am
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: wso2am
+  template:
+    metadata:
+      labels:
+        app: wso2am
+    spec:
+      containers:
+        - name: wso2am
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 9443
+            - containerPort: 8243
+            - containerPort: 8280
+          readinessProbe:
+            httpGet:
+              path: /services/Version
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 180
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /services/Version
+              port: 9443
+              scheme: HTTPS
+            initialDelaySeconds: 180
+            periodSeconds: 30
+          volumeMounts:
+            - name: deployment-toml
+              mountPath: /home/wso2carbon/wso2am-4.4.0/repository/conf/deployment.toml
+              subPath: deployment.toml
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: deployment-toml
+          configMap:
+            name: wso2am-config

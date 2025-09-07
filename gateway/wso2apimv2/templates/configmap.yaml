@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wso2am-config
+data:
+  deployment.toml: |
+    [server]
+    hostname = "192.168.8.22"
+    node_ip = "192.168.8.22"
+
+    [transport.https.properties]
+    proxyPort = 30443
