@@ -1,49 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wso2am
+  name: wso2apim
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      app: wso2am
+      app: wso2apim
   template:
     metadata:
       labels:
-        app: wso2am
+        app: wso2apim
     spec:
       containers:
-        - name: wso2am
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: wso2apim
+          image: wso2/wso2am:4.4.0
           ports:
-            - containerPort: 9443          # Management/Publisher/DevPortal
-            - containerPort: 8243          # Gateway HTTPS
-            - containerPort: 8280          # Gateway HTTP
-          readinessProbe:
-            httpGet:
-              path: /services/Version
-              port: 9443
-              scheme: HTTPS
-            initialDelaySeconds: 180
-            periodSeconds: 30
-          livenessProbe:
-            httpGet:
-              path: /services/Version
-              port: 9443
-              scheme: HTTPS
-            initialDelaySeconds: 180
-            periodSeconds: 30
+            - containerPort: 9443
+            - containerPort: 8280
+            - containerPort: 8243
           volumeMounts:
-            - name: deployment-toml
+            - name: config-volume
               mountPath: /home/wso2carbon/wso2am-4.4.0/repository/conf/deployment.toml
               subPath: deployment.toml
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
       volumes:
-        - name: deployment-toml
+        - name: config-volume
           configMap:
-            name: {{ printf "%s-config" .Release.Name }}
-            items:
-              - key: deployment.toml
-                path: deployment.toml
+            name: wso2apim-config
