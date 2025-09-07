@@ -7,9 +7,10 @@ data:
   deployment.toml: |
     [server]
     hostname = "192.168.8.22"
-    node_ip = "127.0.0.1"
-    server_role = "default"
-    mode = "single"
+    node_ip = "192.168.8.22"
+
+    [transport.https.properties]
+    proxyPort = 30443
 
     [user_store]
     type = "database"
