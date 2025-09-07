@@ -1,6 +1,6 @@
 apiVersion: v2
 name: wso2am-local
-description: A Helm chart for deploying WSO2 API Manager locally
+description: A Helm chart for WSO2 API Manager (non-localhost)
 type: application
 version: 0.1.0
 appVersion: "4.4.0"

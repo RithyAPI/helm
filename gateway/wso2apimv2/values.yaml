@@ -14,12 +14,4 @@ service:
 
 resources: {}
 
-apim:
-  config:
-    enabled: true
-    # This is where we inject the TOML content correctly
-    configData: |
-      [server]
-      hostname = "192.168.8.22"         # 👈 Replace with your PUBLIC IP or DOMAIN
-      node_ip = "192.168.8.22"          # 👈 Needed for NodePort
-      base_path = "https://192.168.8.22:30443"  # 👈 Optional, helps on redirects
+hostname: "192.168.8.22"

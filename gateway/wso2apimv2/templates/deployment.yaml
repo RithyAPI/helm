@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wso2am
+  name: {{ include "wso2am.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: wso2am
+      {{- include "wso2am.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: wso2am
+        {{- include "wso2am.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: wso2am
@@ -39,8 +39,11 @@ spec:
               mountPath: /home/wso2carbon/wso2am-4.4.0/repository/conf/deployment.toml
               subPath: deployment.toml
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: deployment-toml
           configMap:
-            name: wso2am-config
+            name: {{ include "wso2am.fullname" . }}-config
+            items:
+              - key: deployment.toml
+                path: deployment.toml
