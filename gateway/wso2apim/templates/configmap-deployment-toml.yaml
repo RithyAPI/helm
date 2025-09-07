@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-config" .Release.Name }}   # or include "wso2am.fullname"
+  name: {{ include "wso2am.fullname" . }}-config
 data:
-  deployment.toml: |-
-{{- required "values.deploymentToml is required" .Values.deploymentToml | nindent 4 }}
+  deployment.toml: |
+{{ .Values.deploymentToml | indent 4 }}
