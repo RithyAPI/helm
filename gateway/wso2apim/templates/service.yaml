@@ -3,22 +3,33 @@ kind: Service
 metadata:
   name: wso2am
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.service.type }}   # NodePort (or LoadBalancer/ClusterIP)
   selector:
     app: wso2am
   ports:
-    - name: https-admin
+    # UI (Publisher, DevPortal, Carbon) -> 9443
+    - name: https-ui
       protocol: TCP
       port: 9443
       targetPort: 9443
-      nodePort: {{ .Values.service.nodePort }}
-    - name: https-publisher
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.ui | default 30443 }}
+      {{- end }}
+
+    # Gateway HTTPS -> 8243
+    - name: https-gateway
       protocol: TCP
-      port: 9444
-      targetPort: 9444
-      nodePort: 30444
-    - name: https-devportal
+      port: 8243
+      targetPort: 8243
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.gatewayHttps | default 30243 }}
+      {{- end }}
+
+    # Gateway HTTP (optional) -> 8280
+    - name: http-gateway
       protocol: TCP
-      port: 9445
-      targetPort: 9445
-      nodePort: 30445
+      port: 8280
+      targetPort: 8280
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.gatewayHttp | default 30280 }}
+      {{- end }}

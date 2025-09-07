@@ -7,8 +7,10 @@ image:
 
 service:
   type: NodePort
-  port: 9443
-  nodePort: 30443
+  nodePorts:
+    ui: 30443
+    gatewayHttps: 30243
+    gatewayHttp: 30280
 
 resources:
   requests:
@@ -17,3 +19,20 @@ resources:
   limits:
     memory: "4Gi"
     cpu: "1"
+
+# 👇 Add your APIM public URLs here (NodePort case; swap to your IP/host)
+deploymentToml: |
+  [server]
+  hostname = "192.168.8.22"
+  node_ip  = "192.168.8.22"
+
+  [transport.https]
+  port = 9443
+  # External port seen by users (NodePort for 9443)
+  proxyPort = 30443
+
+  [apim.publisher]
+  url = "https://192.168.8.22:30443/publisher"
+
+  [apim.devportal]
+  url = "https://192.168.8.22:30443/devportal"
