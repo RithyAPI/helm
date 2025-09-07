@@ -44,7 +44,7 @@ spec:
       volumes:
         - name: apim-config
           configMap:
-            name: {{ include "wso2am.fullname" . }}-config
+            name: {{ printf "%s-config" .Release.Name }}
             items:
               - key: deployment.toml
                 path: deployment.toml
