@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "wso2am.fullname" . }}-config
+  labels:
+    app: wso2am
+data:
+  deployment.toml: |
+{{- nindent 4 .Values.deploymentToml }}
