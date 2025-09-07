@@ -18,9 +18,8 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 9443          # Management/Publisher/DevPortal
-            # (9444/9445 aren't used in APIM 4.x; safe to remove)
-            - containerPort: 8243          # ← Gateway HTTPS (RECOMMENDED)
-            - containerPort: 8280          # ← Gateway HTTP  (optional)
+            - containerPort: 8243          # Gateway HTTPS
+            - containerPort: 8280          # Gateway HTTP
           readinessProbe:
             httpGet:
               path: /services/Version
@@ -42,7 +41,7 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
-        - name: apim-config
+        - name: deployment-toml
           configMap:
             name: {{ printf "%s-config" .Release.Name }}
             items:
