@@ -33,9 +33,16 @@ deploymentToml: |
   username = "admin"
   password = "admin"
 
+  [database.shared_db]
+  type = "h2"
+  url = "jdbc:h2:./repository/database/WSO2AM_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000"
+  username = "wso2carbon"
+  password = "wso2carbon"
+
   [apim.publisher]
   url = "https://192.168.8.22:30443/publisher"
 
   [apim.devportal]
   url = "https://192.168.8.22:30443/devportal"
+
 
