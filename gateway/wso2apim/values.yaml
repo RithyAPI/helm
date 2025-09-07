@@ -25,14 +25,13 @@ deploymentToml: |
   hostname = "192.168.8.22"
   node_ip = "192.168.8.22"
 
-  [transport.https]
-  port = 9443
-  proxyPort = 30443
-
   [super_admin]
   username = "admin"
   password = "admin"
   create_admin_account = true
+
+  [user_store]
+  type = "database"
 
   [database.shared_db]
   type = "h2"
@@ -40,11 +39,6 @@ deploymentToml: |
   username = "wso2carbon"
   password = "wso2carbon"
 
-  [apim.publisher]
-  url = "https://192.168.8.22:30443/publisher"
-
-  [apim.devportal]
-  url = "https://192.168.8.22:30443/devportal"
 
 
 
