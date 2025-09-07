@@ -12,9 +12,7 @@ spec:
       protocol: TCP
       port: 9443
       targetPort: 9443
-      {{- if eq .Values.service.type "NodePort" }}
-      nodePort: {{ .Values.service.nodePorts.ui | default 30443 }}
-      {{- end }}
+      nodePort: 30443
 
     # Gateway HTTPS -> 8243
     - name: https-gateway
