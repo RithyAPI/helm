@@ -17,33 +17,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 9443          # Management/Publisher/DevPortal
-            - containerPort: 8243          # Gateway HTTPS
-            - containerPort: 8280          # Gateway HTTP
-          readinessProbe:
-            httpGet:
-              path: /services/Version
-              port: 9443
-              scheme: HTTPS
-            initialDelaySeconds: 180
-            periodSeconds: 30
-          livenessProbe:
-            httpGet:
-              path: /services/Version
-              port: 9443
-              scheme: HTTPS
-            initialDelaySeconds: 180
-            periodSeconds: 30
-          volumeMounts:
-            - name: deployment-toml
-              mountPath: /home/wso2carbon/wso2am-4.4.0/repository/conf/deployment.toml
-              subPath: deployment.toml
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-      volumes:
-        - name: deployment-toml
-          configMap:
-            name: {{ printf "%s-config" .Release.Name }}
-            items:
-              - key: deployment.toml
-                path: deployment.toml
+            - containerPort: 9443  # Admin Portal
+            - containerPort: 9444  # Publisher
+            - containerPort: 9445  # Developer Portal

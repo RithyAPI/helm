@@ -12,33 +12,4 @@ service:
     gatewayHttps: 30243
     gatewayHttp: 30280
 
-resources:
-  requests:
-    memory: "2Gi"
-    cpu: "500m"
-  limits:
-    memory: "4Gi"
-    cpu: "1"
-
-deploymentToml: |
-  [server]
-  hostname = "192.168.8.22"
-  node_ip = "192.168.8.22"
-
-  [super_admin]
-  username = "admin"
-  password = "admin"
-  create_admin_account = true
-
-  [user_store]
-  type = "database"
-
-  [database.shared_db]
-  type = "h2"
-  url = "jdbc:h2:./repository/database/WSO2AM_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000"
-  username = "wso2carbon"
-  password = "wso2carbon"
-
-
-
-
+resources: {}
