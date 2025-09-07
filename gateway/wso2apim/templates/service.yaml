@@ -1,18 +1,35 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: wso2apim
+  name: wso2am
 spec:
-  type: NodePort
+  type: {{ .Values.service.type }}   # NodePort (or LoadBalancer/ClusterIP)
   selector:
-    app: wso2apim
+    app: wso2am
   ports:
-    - port: 9443
+    # UI (Publisher, DevPortal, Carbon) -> 9443
+    - name: https-ui
+      protocol: TCP
+      port: 9443
       targetPort: 9443
-      nodePort: 30443
-    - port: 8280
-      targetPort: 8280
-      nodePort: 30280
-    - port: 8243
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.ui | default 30443 }}
+      {{- end }}
+
+    # Gateway HTTPS -> 8243
+    - name: https-gateway
+      protocol: TCP
+      port: 8243
       targetPort: 8243
-      nodePort: 30243
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.gatewayHttps | default 30243 }}
+      {{- end }}
+
+    # Gateway HTTP (optional) -> 8280
+    - name: http-gateway
+      protocol: TCP
+      port: 8280
+      targetPort: 8280
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePorts.gatewayHttp | default 30280 }}
+      {{- end }}
